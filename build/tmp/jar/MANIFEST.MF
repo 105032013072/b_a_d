@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Implementation-Title: Gradle
+Implementation-Version: 1.1.1-min
+Main-Class: io.github.yedaxia.apidocs.Docs
+

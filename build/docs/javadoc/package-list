@@ -1,0 +1,12 @@
+io.github.yedaxia.apidocs
+io.github.yedaxia.apidocs.codegenerator
+io.github.yedaxia.apidocs.codegenerator.ios
+io.github.yedaxia.apidocs.codegenerator.ios.builder
+io.github.yedaxia.apidocs.codegenerator.java
+io.github.yedaxia.apidocs.codegenerator.java.builder
+io.github.yedaxia.apidocs.codegenerator.model
+io.github.yedaxia.apidocs.codegenerator.provider
+io.github.yedaxia.apidocs.doc
+io.github.yedaxia.apidocs.ext.rap
+io.github.yedaxia.apidocs.http
+io.github.yedaxia.apidocs.parser

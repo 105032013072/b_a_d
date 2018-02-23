@@ -1,0 +1,77 @@
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'com.bosssoft.platform'
+version = '1.0.0-RELEASE'
+sourceCompatibility = 1.8
+task writeNewPom << {
+    pom {
+        project {
+            inceptionYear '2014'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }.writeTo("pom.xml")
+}
+
+tasks.withType(GroovyCompile) {   
+    groovyOptions.encoding = "MacRoman"   
+}  
+
+tasks.withType(JavaCompile) {  
+    options.encoding = "UTF-8"  
+}
+
+javadoc {
+    options{
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        author true
+        version true
+        links "http://docs.oracle.com/javase/7/docs/api"
+        title "这里写文档标题"
+    }
+}
+
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+apply from: '../uploadMaven.gradle'
+
+group 'io.github.yedaxia'
+version VERSION_NAME + '-min'
+
+sourceCompatibility = 1.8
+
+jar {
+    baseName "io.github.yedaxia.apidocs"
+    manifest {
+        attributes("Implementation-Title": "Gradle",
+                   "Implementation-Version": version,
+                   "Main-Class":"io.github.yedaxia.apidocs.Docs")
+    }
+}
+
+shadowJar {
+    baseName = 'io.github.yedaxia.apidocs'
+    classifier = "all"
+    version = VERSION_NAME
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.github.javaparser:javaparser-core:3.3.0'
+}
