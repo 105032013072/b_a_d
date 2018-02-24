@@ -16,7 +16,7 @@ public class InterfaceNode {
     private Explain returnNode;
     
     //抛出的异常信息
-    private List<Explain> throwsNode;
+    private List<Explain> throwsNode=new ArrayList<>();
 
 	public String getMethodName() {
 		return methodName;
@@ -67,8 +67,22 @@ public class InterfaceNode {
 	        return null;
 	    }
 	 
+	 
+	 public Explain getThrowsNodeByName(String name){
+		 for (Explain e : throwsNode) {
+			if(e.getType().equals(name)){
+				return e;
+			}
+		}
+		 return null;
+	 }
+	 
 	 public void addParamNode(ParamNode node){
 		 paramNodes.add(node);
+	 }
+	 
+	 public void addThrowsNode(Explain explain){
+		 throwsNode.add(explain);
 	 }
    
 }

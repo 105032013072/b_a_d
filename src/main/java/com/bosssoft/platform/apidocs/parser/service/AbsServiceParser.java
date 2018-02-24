@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
@@ -17,6 +18,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.ReferenceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
@@ -76,10 +79,42 @@ public abstract  class AbsServiceParser {
 				paramNode.setType(ParseUtils.unifyType(parameter.getType().asString()));
 				interfaceNode.addParamNode(paramNode);
 			}
+	    	//返回类型
+	    	Explain e=new Explain();
+	    	e.setType(ParseUtils.unifyType(m.getType().asString()));
+	    	interfaceNode.setReturnNode(e);
 	    	
+	    	//抛出的异常类型
+	    	NodeList<ReferenceType> exceptionList=m.getThrownExceptions();
+	    	for (ReferenceType referenceType : exceptionList) {
+				Explain explain=new Explain();
+			    explain.setType(referenceType.asString());
+			    interfaceNode.addThrowsNode(explain);
+			}
 	    	
 	    	//方法注释
 	    	Javadoc javadoc=getMethodDoc(m,declaration);
+	    	if(javadoc!=null){
+	    		String description=javadoc.getDescription().toText();
+	    	    interfaceNode.setDescription(description);
+	    	    List<JavadocBlockTag> tagList=javadoc.getBlockTags();
+	    	    for (JavadocBlockTag javadocBlockTag : tagList) {
+					String tagName=javadocBlockTag.getTagName();
+					System.out.println(javadocBlockTag.getContent().toText());
+					if ("param".equals(tagName)) {
+						ParamNode paramNode = interfaceNode.getParamNodeByName(javadocBlockTag.getName());
+						paramNode.setDescription(javadocBlockTag.getContent().toText());
+					}else if("return".equals(tagName)){
+	    	    	  interfaceNode.getReturnNode().setDescription(javadocBlockTag.getContent().toText());
+	    	    	}else if("throws".equals(tagName)){
+	    	    	   String excceptonName=javadocBlockTag.getName();
+	    	    	   if(excceptonName!=null){
+	    	    		   Explain exp=interfaceNode.getThrowsNodeByName(excceptonName);
+	    	    		   exp.setDescription(javadocBlockTag.getContent().toText());
+	    	    	   }
+	    	    	}
+				}
+	    	}
 	    	
 		}
 	}
