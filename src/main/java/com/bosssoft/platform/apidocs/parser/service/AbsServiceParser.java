@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.parser.helper.Parser;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
@@ -38,7 +39,7 @@ public abstract  class AbsServiceParser {
     	
     	if(declaration!=null){
     		//获取实现的接口
-    		ClassOrInterfaceDeclaration implementDeclaration= getServiceInterface(declaration);
+    		ClassOrInterfaceDeclaration implementDeclaration=Parser.parserImplementInterface(javaFile, declaration);
     	
     		//解析类的注释
     		parseClassDocs(declaration,implementDeclaration);
@@ -52,7 +53,7 @@ public abstract  class AbsServiceParser {
     	return serviceNode;
     }
 
-	private ClassOrInterfaceDeclaration getServiceInterface(ClassOrInterfaceDeclaration declaration) {
+	/*private ClassOrInterfaceDeclaration getServiceInterface(ClassOrInterfaceDeclaration declaration) {
 		String  implementClassName=declaration.getImplementedTypes(0).getNameAsString();
 		File modelJavaFile=ParseUtils.searchJavaFile(javaFile, implementClassName);
 		ClassOrInterfaceDeclaration cid = null;
@@ -64,25 +65,24 @@ public abstract  class AbsServiceParser {
 			}
 		}
 		return cid;
-	}
+	}*/
 
 	private void parseMethodDocs(ClassOrInterfaceDeclaration declaration, ClassOrInterfaceDeclaration implementDeclaration) {
 		List<MethodDeclaration> implementMethodDeclarationList=getMethodDeclaration(implementDeclaration);
 	    for (MethodDeclaration m : implementMethodDeclarationList) {
 	    	InterfaceNode  interfaceNode=new InterfaceNode();
+	    	
+	    	//方法名
+	    	interfaceNode.setMethodName(Parser.parserMethodName(m));
+	    	
 	    	//参数名以及类型
 	    	NodeList<Parameter> paramList=m.getParameters();
 	    	for (Parameter parameter : paramList) {
-				String paramName=parameter.getName().asString();
-				ParamNode paramNode=new ParamNode();
-				paramNode.setName(paramName);
-				paramNode.setType(ParseUtils.unifyType(parameter.getType().asString()));
-				interfaceNode.addParamNode(paramNode);
+				interfaceNode.addParamNode(Parser.constructParamNode(parameter));
 			}
+	    	
 	    	//返回类型
-	    	Explain e=new Explain();
-	    	e.setType(ParseUtils.unifyType(m.getType().asString()));
-	    	interfaceNode.setReturnNode(e);
+	    	interfaceNode.setReturnNode(Parser.constructReturnNode(m));
 	    	
 	    	//抛出的异常类型
 	    	NodeList<ReferenceType> exceptionList=m.getThrownExceptions();
@@ -100,7 +100,7 @@ public abstract  class AbsServiceParser {
 	    	    List<JavadocBlockTag> tagList=javadoc.getBlockTags();
 	    	    for (JavadocBlockTag javadocBlockTag : tagList) {
 					String tagName=javadocBlockTag.getTagName();
-					System.out.println(javadocBlockTag.getContent().toText());
+					
 					if ("param".equals(tagName)) {
 						ParamNode paramNode = interfaceNode.getParamNodeByName(javadocBlockTag.getName());
 						paramNode.setDescription(javadocBlockTag.getContent().toText());
@@ -115,8 +115,9 @@ public abstract  class AbsServiceParser {
 	    	    	}
 				}
 	    	}
-	    	
+	    	serviceNode.addInterfaceNodes(interfaceNode);
 		}
+	    
 	}
 
 	private Javadoc getMethodDoc(MethodDeclaration m, ClassOrInterfaceDeclaration declaration) {
@@ -173,14 +174,15 @@ public abstract  class AbsServiceParser {
 			String description = javadoc.getDescription().toText();
 			serviceNode.setDescription(description);
 
-			List<JavadocBlockTag> blockTags = javadoc.getBlockTags();
+		/*	List<JavadocBlockTag> blockTags = javadoc.getBlockTags();
 			if (blockTags != null) {
 				for (JavadocBlockTag blockTag : blockTags) {
 					if ("author".equalsIgnoreCase(blockTag.getTagName())) {
 						serviceNode.setAuthor(blockTag.getContent().toText());
 					}
 				}
-			}
+			}*/
+			serviceNode.setAuthor(Parser.parserClassAuthor(javadoc));
 		}
 
 		// 若类没有注释，则description为类名
