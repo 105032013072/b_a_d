@@ -21,7 +21,8 @@ import com.bosssoft.platform.apidocs.parser.mate.ControllerNode;
 public class HtmlDocGenerator extends AbsDocGenerator {
 
     public HtmlDocGenerator() {
-        super(DocContext.controllerParser(), DocContext.getServiceParser(), new HtmlControllerDocBuilder());
+        super(DocContext.controllerParser(), DocContext.getServiceParser(),DocContext.getMapperParser(), 
+        		DocContext.getEntityParser(),new HtmlControllerDocBuilder());
     }
 
     @Override

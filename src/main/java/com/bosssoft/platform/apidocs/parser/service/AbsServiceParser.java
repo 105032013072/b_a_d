@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
-import com.bosssoft.platform.apidocs.parser.helper.Parser;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
@@ -39,7 +38,7 @@ public abstract  class AbsServiceParser {
     	
     	if(declaration!=null){
     		//获取实现的接口
-    		ClassOrInterfaceDeclaration implementDeclaration=Parser.parserImplementInterface(javaFile, declaration);
+    		ClassOrInterfaceDeclaration implementDeclaration=ParseUtils.parserImplementInterface(javaFile, declaration);
     	
     		//解析类的注释
     		parseClassDocs(declaration,implementDeclaration);
@@ -73,16 +72,16 @@ public abstract  class AbsServiceParser {
 	    	InterfaceNode  interfaceNode=new InterfaceNode();
 	    	
 	    	//方法名
-	    	interfaceNode.setMethodName(Parser.parserMethodName(m));
+	    	interfaceNode.setMethodName(ParseUtils.parserMethodName(m));
 	    	
 	    	//参数名以及类型
 	    	NodeList<Parameter> paramList=m.getParameters();
 	    	for (Parameter parameter : paramList) {
-				interfaceNode.addParamNode(Parser.constructParamNode(parameter));
+				interfaceNode.addParamNode(ParseUtils.constructParamNode(parameter));
 			}
 	    	
 	    	//返回类型
-	    	interfaceNode.setReturnNode(Parser.constructReturnNode(m));
+	    	interfaceNode.setReturnNode(ParseUtils.constructReturnNode(m));
 	    	
 	    	//抛出的异常类型
 	    	NodeList<ReferenceType> exceptionList=m.getThrownExceptions();
@@ -95,25 +94,7 @@ public abstract  class AbsServiceParser {
 	    	//方法注释
 	    	Javadoc javadoc=getMethodDoc(m,declaration);
 	    	if(javadoc!=null){
-	    		String description=javadoc.getDescription().toText();
-	    	    interfaceNode.setDescription(description);
-	    	    List<JavadocBlockTag> tagList=javadoc.getBlockTags();
-	    	    for (JavadocBlockTag javadocBlockTag : tagList) {
-					String tagName=javadocBlockTag.getTagName();
-					
-					if ("param".equals(tagName)) {
-						ParamNode paramNode = interfaceNode.getParamNodeByName(javadocBlockTag.getName());
-						paramNode.setDescription(javadocBlockTag.getContent().toText());
-					}else if("return".equals(tagName)){
-	    	    	  interfaceNode.getReturnNode().setDescription(javadocBlockTag.getContent().toText());
-	    	    	}else if("throws".equals(tagName)){
-	    	    	   String excceptonName=javadocBlockTag.getName();
-	    	    	   if(excceptonName!=null){
-	    	    		   Explain exp=interfaceNode.getThrowsNodeByName(excceptonName);
-	    	    		   exp.setDescription(javadocBlockTag.getContent().toText());
-	    	    	   }
-	    	    	}
-				}
+	    		ParseUtils.parserMethodNotes(interfaceNode, javadoc);
 	    	}
 	    	serviceNode.addInterfaceNodes(interfaceNode);
 		}
@@ -182,7 +163,7 @@ public abstract  class AbsServiceParser {
 					}
 				}
 			}*/
-			serviceNode.setAuthor(Parser.parserClassAuthor(javadoc));
+			serviceNode.setAuthor(ParseUtils.parserClassAuthor(javadoc));
 		}
 
 		// 若类没有注释，则description为类名

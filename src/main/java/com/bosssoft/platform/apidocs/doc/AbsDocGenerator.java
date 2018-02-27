@@ -9,7 +9,11 @@ import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.LogUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.controller.AbsControllerParser;
+import com.bosssoft.platform.apidocs.parser.entity.EntityParser;
+import com.bosssoft.platform.apidocs.parser.mapper.AbsMapperParser;
 import com.bosssoft.platform.apidocs.parser.mate.ControllerNode;
+import com.bosssoft.platform.apidocs.parser.mate.EntityNode;
+import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.bosssoft.platform.apidocs.parser.service.AbsServiceParser;
 
@@ -17,15 +21,23 @@ public abstract class AbsDocGenerator{
 
     private AbsControllerParser controllerParser;
     private AbsServiceParser serviceParser;
+    private AbsMapperParser mapperParser;
+    private EntityParser entityParser;
+    
     private IControllerDocBuilder controllerDocBuilder;
     private List<String> docFileNameList = new ArrayList<>();
+   
     private List<ControllerNode> controllerNodeList = new ArrayList<>();
     private List<ServiceNode> serviceNodeList=new ArrayList<>();
+    private List<MapperNode> mapperNodeList=new ArrayList<>();
+    private List<EntityNode> entityNodeList=new ArrayList<>();
     
-    public AbsDocGenerator(AbsControllerParser controllerParser,AbsServiceParser serviceParser, IControllerDocBuilder controllerDocBuilder) {
+    public AbsDocGenerator(AbsControllerParser controllerParser,AbsServiceParser serviceParser,AbsMapperParser mapperParser,EntityParser entityParser, IControllerDocBuilder controllerDocBuilder) {
         this.controllerParser = controllerParser;
         this.serviceParser=serviceParser;
+        this.mapperParser=mapperParser;
         this.controllerDocBuilder = controllerDocBuilder;
+        this.entityParser=entityParser;
     }
 
     /**
@@ -40,11 +52,43 @@ public abstract class AbsDocGenerator{
         LogUtils.info("generate api docs for service...");
         generateServicessDocs();
        
+        LogUtils.info("generate api docs for mapper...");
+        generateMapperssDocs();
+        
+        LogUtils.info("generate api docs for entity...");
+        generateEntitysDocs();
+        
         generateIndex(docFileNameList);
         LogUtils.info("generate api docs done !!!");
     }
 
-    private void generateServicessDocs() {
+    private void generateEntitysDocs() {
+    	File[] entityFiles=DocContext.getEntityFiles();
+		for (File entityFile : entityFiles) {
+			try{
+				EntityNode eNode=entityParser.parse(entityFile);
+				entityNodeList.add(eNode);
+			}catch(Exception e){
+				LogUtils.error("generate docs for mapper file : "+entityFile.getName(), e);
+			}
+			
+		}
+	}
+
+	private void generateMapperssDocs() {
+		File[] mapperFiles=DocContext.getMapperFile();
+		for (File mapperFile : mapperFiles) {
+			try{
+				MapperNode mNode=mapperParser.parse(mapperFile);
+				mapperNodeList.add(mNode);
+			}catch(Exception e){
+				LogUtils.error("generate docs for mapper file : "+mapperFile.getName(), e);
+			}
+			
+		}
+	}
+
+	private void generateServicessDocs() {
 		File[] serviceFiles=DocContext.getServiceFiles();
 		for (File serviceFile : serviceFiles) {
 			try{

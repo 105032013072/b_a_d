@@ -1,8 +1,11 @@
 package com.bosssoft.platform.apidocs;
 
 import com.bosssoft.platform.apidocs.parser.mate.ClassNode;
+import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.FieldNode;
+import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.MockNode;
+import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.*;
@@ -14,6 +17,8 @@ import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.JavadocBlockTag;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -487,4 +492,158 @@ public class ParseUtils {
             return false;
         }
     }
+    
+    
+    /**
+	 * 获取类的实现接口
+	 * @param javaFile
+	 * @param cod
+	 * @return
+	 */
+  public static ClassOrInterfaceDeclaration parserImplementInterface(File javaFile,ClassOrInterfaceDeclaration cod){
+	  String  implementClassName=cod.getImplementedTypes(0).getNameAsString();
+		File modelJavaFile=ParseUtils.searchJavaFile(javaFile, implementClassName);
+		ClassOrInterfaceDeclaration cid = null;
+		List<ClassOrInterfaceDeclaration> list = ParseUtils.compilationUnit(modelJavaFile).getChildNodesByType(ClassOrInterfaceDeclaration.class);
+		for (ClassOrInterfaceDeclaration classOrInterfaceDeclaration : list) {
+			if (implementClassName.endsWith(classOrInterfaceDeclaration.getNameAsString())) {
+				cid = classOrInterfaceDeclaration; 
+				break; 
+			}
+		}
+		return cid;
+  }
+  
+  
+ /* public static void parserExtendsClass(File javaFile,ClassOrInterfaceDeclaration cod){
+	 Javadoc javadoc=cod.getJavadoc();
+	  NodeList<ClassOrInterfaceType> list= cod.getExtendedTypes();
+	  if(list.size()>0){
+		  String name=list.get(0).getNameAsString();
+		//  File modelJavaFile=ParseUtils.searchJavaFile(javaFile, name);
+		 
+		 //获取类的所有导入
+		  CompilationUnit compilationUnit= ParseUtils.compilationUnit(javaFile);
+		  getImportDeclaration(compilationUnit, name);
+	  }
+	  
+  }*/
+  
+  
+  
+  /**
+   * 获取类的作者
+   * @param javadoc
+   * @return
+   */
+  public static String parserClassAuthor(Javadoc javadoc){
+	  List<JavadocBlockTag> blockTags = javadoc.getBlockTags();
+		if (blockTags != null) {
+			for (JavadocBlockTag blockTag : blockTags) {
+				if ("author".equalsIgnoreCase(blockTag.getTagName())) {
+					return blockTag.getContent().toText();
+				}
+			}
+		}
+		return "";
+  }
+  
+  /**
+   * 获取方法名
+   * @param m
+   * @return
+   */
+  public static String parserMethodName(MethodDeclaration m){
+	  return m.getNameAsString();
+  }
+  
+  /**
+   * 构造方法参数节点
+   * @param parameter
+   * @return
+   */
+  public static ParamNode constructParamNode(Parameter parameter){
+	    String paramName=parameter.getName().asString();
+		ParamNode paramNode=new ParamNode();
+		paramNode.setName(paramName);
+		paramNode.setType(parameter.getType().asString());
+		return paramNode;
+  }
+  
+  public static Explain constructReturnNode(MethodDeclaration m){
+	  Explain e=new Explain();
+	  e.setType(m.getType().asString());
+	  return e;
+  }
+  
+  /**
+   * 解析方法上的注释
+   * @param interfaceNode
+   * @param javadoc
+   */
+  public static void parserMethodNotes(InterfaceNode interfaceNode,Javadoc javadoc){
+
+		String description=javadoc.getDescription().toText();
+	    interfaceNode.setDescription(description);
+	    List<JavadocBlockTag> tagList=javadoc.getBlockTags();
+	    for (JavadocBlockTag javadocBlockTag : tagList) {
+			String tagName=javadocBlockTag.getTagName();
+			
+			if ("param".equals(tagName)) {
+				ParamNode paramNode = interfaceNode.getParamNodeByName(javadocBlockTag.getName());
+				if(paramNode==null){
+					paramNode=new ParamNode();
+					paramNode.setDescription(javadocBlockTag.getContent().toText());
+					interfaceNode.addParamNode(paramNode);
+				}else{
+					paramNode.setDescription(javadocBlockTag.getContent().toText());
+				}
+			}else if("return".equals(tagName)){
+				String content=javadocBlockTag.getContent().toText();
+				Explain explain=interfaceNode.getReturnNode();
+				if(explain==null){
+				   explain=new Explain();
+				   interfaceNode.setReturnNode(explain);
+				}
+				interfaceNode.getReturnNode().setDescription(javadocBlockTag.getContent().toText());
+	    	}else if("throws".equals(tagName)){
+	    	   String excceptonName=javadocBlockTag.getName();
+	    	   if(excceptonName!=null){
+	    		   Explain exp=interfaceNode.getThrowsNodeByName(excceptonName);
+	    		   if(exp==null){
+	    			   exp=new Explain();
+	    			   exp.setDescription(javadocBlockTag.getContent().toText());
+	    			   interfaceNode.addThrowsNode(exp);
+	    		   }else {
+	    			   exp.setDescription(javadocBlockTag.getContent().toText());
+	    		   }
+	    	   }
+	    	}
+		}
+	
+  }
+  
+  /**
+   * 获取接口继承的类（全名）
+   * @param javaFile ：接口文件
+   * @return
+   */
+  public static List<String> getExtendsClass(File javaFile){
+	  List<String> result=new ArrayList<String>();
+	  CompilationUnit compilationUnit=ParseUtils.compilationUnit(javaFile);
+	  String interfaceName=Utils.getJavaFileName(javaFile);
+	  //获取该接口实现的类
+	  ClassOrInterfaceDeclaration cod=compilationUnit.getInterfaceByName(interfaceName);
+	  if(cod!=null){
+		  NodeList<ClassOrInterfaceType> extendList=cod.getExtendedTypes();
+		  for (ClassOrInterfaceType classOrInterfaceType : extendList) {
+			String name=classOrInterfaceType.getNameAsString();
+			ImportDeclaration importde=getImportDeclaration(compilationUnit, name);
+			if(importde!=null) result.add(importde.getNameAsString());
+		}
+	  }
+	  return result;
+  }
+    
+    
 }
