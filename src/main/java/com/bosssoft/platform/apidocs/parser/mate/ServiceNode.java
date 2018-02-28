@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceNode {
+	
+	private String serviceName;//类名
+	
 	private String author;
 	
     private String description;
+    
+    private List<Explain> autowiredMapperList= new ArrayList<>();
     
     private List<InterfaceNode> interfaceNodes = new ArrayList<>();
 
@@ -37,4 +42,26 @@ public class ServiceNode {
     public void addInterfaceNodes(InterfaceNode interfaceNode){
     	interfaceNodes.add(interfaceNode);
     }
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
+	
+    
+	public List<Explain> getAutowiredMapperList() {
+		return autowiredMapperList;
+	}
+
+	public void setAutowiredMapperList(List<Explain> autowiredMapperList) {
+		this.autowiredMapperList = autowiredMapperList;
+	}
+
+	public void addAutowiredMapper(Explain autowiredMapper) {
+		this.autowiredMapperList.add(autowiredMapper);
+	}
 }

@@ -3,15 +3,19 @@ package com.bosssoft.platform.apidocs.parser.controller;
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.mate.ControllerNode;
+import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
+import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -22,8 +26,10 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -36,9 +42,10 @@ public abstract class AbsControllerParser {
     private CompilationUnit compilationUnit;
     private ControllerNode controllerNode;
     private File javaFile;
+    private Map<String,ServiceNode> serviceNodeMap=new HashMap<>();
 
-    public ControllerNode parse(File javaFile){
-
+    public ControllerNode parse(File javaFile,Map<String,ServiceNode> serviceNodeMap){
+        this.serviceNodeMap=serviceNodeMap;
         this.javaFile = javaFile;
         this.compilationUnit = ParseUtils.compilationUnit(javaFile);
         this.controllerNode = new ControllerNode();
@@ -53,6 +60,7 @@ public abstract class AbsControllerParser {
         ClassOrInterfaceDeclaration declaration =compilationUnit.getClassByName(controllerName);
         if(declaration!=null){
         	 parseClassDoc(declaration);
+     		parseAutowireService(declaration);//解析调用的service
              parseMethodDocs(declaration);
              afterHandleController(controllerNode, declaration);
         }
@@ -60,7 +68,23 @@ public abstract class AbsControllerParser {
         return controllerNode; 
     }
 
-    protected File getControllerFile(){
+    private void parseAutowireService(ClassOrInterfaceDeclaration declaration) {
+    	List<FieldDeclaration> fieldList=declaration.getFields();
+		for (FieldDeclaration fieldDeclaration : fieldList) {
+			VariableDeclarator variable=fieldDeclaration.getVariable(0);
+			String fieldType=variable.getType().asString();
+			if(IsServiceExist(fieldType)) {
+				Explain explain=new Explain();
+				explain.setType(fieldType);
+				explain.setDescription(serviceNodeMap.get(fieldType).getDescription());
+				controllerNode.addAutowiredService(explain);
+			}
+				
+		}
+		
+	}
+
+	protected File getControllerFile(){
         return javaFile;
     }
 
@@ -98,6 +122,8 @@ public abstract class AbsControllerParser {
         if(controllerNode.getDescription() == null){
             controllerNode.setDescription(c.getNameAsString());
         }
+        
+        controllerNode.setControlelrName(c.getNameAsString());
 
     }
 
@@ -254,6 +280,12 @@ public abstract class AbsControllerParser {
 		
 		return result;
 	}
+    
+    private  Boolean IsServiceExist(String serviceName){
+    	if(serviceNodeMap.get(serviceName)!=null) return true;
+    	else return false;
+    }
+   
 
 	/**
      * called after controller node has handled

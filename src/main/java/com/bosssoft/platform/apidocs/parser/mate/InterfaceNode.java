@@ -13,7 +13,7 @@ public class InterfaceNode {
     private List<ParamNode> paramNodes = new ArrayList<>();
     
     //方法的返回信息
-    private Explain returnNode;
+    private ReturnNode returnNode;
     
     //抛出的异常信息
     private List<Explain> throwsNode=new ArrayList<>();
@@ -42,11 +42,13 @@ public class InterfaceNode {
 		this.paramNodes = paramNodes;
 	}
 
-	public Explain getReturnNode() {
+	
+
+	public ReturnNode getReturnNode() {
 		return returnNode;
 	}
 
-	public void setReturnNode(Explain returnNode) {
+	public void setReturnNode(ReturnNode returnNode) {
 		this.returnNode = returnNode;
 	}
 

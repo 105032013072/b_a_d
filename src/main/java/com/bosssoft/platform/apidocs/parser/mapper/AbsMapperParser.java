@@ -2,10 +2,14 @@ package com.bosssoft.platform.apidocs.parser.mapper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.parser.mate.EntityNode;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
@@ -16,6 +20,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.javadoc.Javadoc;
 
@@ -23,9 +28,10 @@ public abstract class AbsMapperParser {
 	private CompilationUnit compilationUnit;
     private MapperNode mapperNode;
     private File javaFile;
+    private  Map<String,EntityNode> entityNodeMap=new HashMap<>();
     
-    
-    public MapperNode parse(File javaFile){
+    public MapperNode parse(File javaFile,Map<String,EntityNode> entityNodeMap){
+    	this.entityNodeMap=entityNodeMap;
     	mapperNode=new MapperNode();
     	this.javaFile=javaFile;
     	this.compilationUnit= ParseUtils.compilationUnit(javaFile);
@@ -59,7 +65,7 @@ public abstract class AbsMapperParser {
 			}
 	    	
 	    	//返回类型
-	    	interfaceNode.setReturnNode(ParseUtils.constructReturnNode(m));
+	    	interfaceNode.setReturnNode(ParseUtils.constructReturnNode(javaFile,m));
 	    	
 	    	//抛出的异常类型
 	    	NodeList<ReferenceType> exceptionList=m.getThrownExceptions();
@@ -96,18 +102,35 @@ public abstract class AbsMapperParser {
 
 
 	private void parseClassDocs(ClassOrInterfaceDeclaration declaration) {
-		Javadoc javadoc=declaration.getJavadoc();
-		if(javadoc!=null){
+		
+		Javadoc javadoc = declaration.getJavadoc();
+		
+		ClassOrInterfaceType implement= declaration.getExtendedTypes(0);
+		String type= implement.getTypeArguments().get(0).asString();
+		if(IsEntityExist(type)){
+			Explain explain=new Explain();
+			explain.setType(type);
+			explain.setDescription(entityNodeMap.get(type).getDescription());
+			 mapperNode.setRelationEntity(explain);
+		}
+		
+		if (javadoc != null) {
 			String description = javadoc.getDescription().toText();
 			mapperNode.setDescription(description);
 			mapperNode.setAuthor(ParseUtils.parserClassAuthor(javadoc));
 		}
-		
 
-	// 若类没有注释，则description为类名
-	if (mapperNode.getDescription() == null) {
-		mapperNode.setDescription(declaration.getNameAsString());
+		// 若类没有注释，则description为类名
+		if (mapperNode.getDescription() == null) {
+			mapperNode.setDescription(declaration.getNameAsString());
+		}
+
+		mapperNode.setMapperName(declaration.getNameAsString());
+
 	}
-		
-  }
+	
+	public Boolean IsEntityExist(String entityName){
+    	if(entityNodeMap.get(entityName)!=null) return true;
+    	else return false;
+    }
 }

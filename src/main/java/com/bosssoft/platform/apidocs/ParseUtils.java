@@ -7,6 +7,7 @@ import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.MockNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
+import com.bosssoft.platform.apidocs.parser.mate.ReturnNode;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
@@ -35,7 +36,7 @@ public class ParseUtils {
     /**
      * means a model class type
      */
-    private static final String TYPE_MODEL = "unkown";
+    public static final String TYPE_MODEL = "unkown";
 
     /**
      * search File of className in the java file
@@ -570,13 +571,51 @@ public class ParseUtils {
 		return paramNode;
   }
   
-  public static Explain constructReturnNode(MethodDeclaration m){
-	  Explain e=new Explain();
-	  e.setType(m.getType().asString());
-	  return e;
+  public static ReturnNode constructReturnNode(File javaFile,MethodDeclaration methodDeclaration){
+	  ReturnNode returnNode=new ReturnNode();
+	  returnNode.setType(methodDeclaration.getType().asString());
+	  String baisctype=getBasicType(methodDeclaration.getType());
+	  File f=null;
+      try{
+    	   f=  ParseUtils.searchJavaFile(javaFile, baisctype);
+      }catch (Exception e) {
+	    System.out.println(baisctype+" can not to file java file");
+	  }
+     if(f!=null){
+    	 ResponseNode responseNode = new ResponseNode();
+    	 responseNode.setClassName(Utils.getJavaFileName(f));
+         ParseUtils.parseResponseNode(f, responseNode);
+         returnNode.setJsonString((responseNode.toJsonApi())); 
+     }
+	  return returnNode;
   }
   
-  /**
+  private static String getBasicType(Type type) {
+	  
+  	String typeStr=type.asString();
+  	if(ParseUtils.TYPE_MODEL.equals(typeStr)||"Void".equalsIgnoreCase(typeStr)){
+  		return type.asString();
+  	}else if(type instanceof ClassOrInterfaceType) {
+  		ClassOrInterfaceType cot=(ClassOrInterfaceType) type;
+  		String name=cot.getNameAsString();
+  		if(name.equals("Map")||name.equals("HashMap")||name.equals("TreeMap")||name.equals("Hashtable")){
+  			NodeList<Type> list=cot.getTypeArguments();
+  			if(list.size()>0){
+  				return getBasicType(list.get(1));
+  			}
+  		}else if(name.equals("List")||name.equals("LinkedList")||name.equals("ArrayList")||name.equals("Vector")||name.equals("Set")){
+  			NodeList<Type> list=cot.getTypeArguments();
+  			if(list.size()>0){
+  				return getBasicType(list.get(0));
+  			}
+  		}
+  	}
+ 
+  	return type.asString();
+	
+}
+
+/**
    * 解析方法上的注释
    * @param interfaceNode
    * @param javadoc
@@ -600,10 +639,10 @@ public class ParseUtils {
 				}
 			}else if("return".equals(tagName)){
 				String content=javadocBlockTag.getContent().toText();
-				Explain explain=interfaceNode.getReturnNode();
-				if(explain==null){
-				   explain=new Explain();
-				   interfaceNode.setReturnNode(explain);
+				ReturnNode returnNode=interfaceNode.getReturnNode();
+				if(returnNode==null){
+					returnNode=new ReturnNode();
+				   interfaceNode.setReturnNode(returnNode);
 				}
 				interfaceNode.getReturnNode().setDescription(javadocBlockTag.getContent().toText());
 	    	}else if("throws".equals(tagName)){
@@ -620,6 +659,9 @@ public class ParseUtils {
 	    	   }
 	    	}
 		}
+	    
+	   
+	    
 	
   }
   

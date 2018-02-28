@@ -11,6 +11,8 @@ public class EntityNode {
 	//描述
 	private String description;
 	
+	private String tableName;
+	
 	private List<AttributeNode> attributeList=new ArrayList<>();
 
 	public String getClassName() {
@@ -49,6 +51,14 @@ public class EntityNode {
 		attributeList.add(attributeNode);
 	}
 
-	
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+    
 	
 }

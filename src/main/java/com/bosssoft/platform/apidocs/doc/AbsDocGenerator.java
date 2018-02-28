@@ -3,7 +3,9 @@ package com.bosssoft.platform.apidocs.doc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.LogUtils;
@@ -27,10 +29,16 @@ public abstract class AbsDocGenerator{
     private IControllerDocBuilder controllerDocBuilder;
     private List<String> docFileNameList = new ArrayList<>();
    
-    private List<ControllerNode> controllerNodeList = new ArrayList<>();
+    /*private List<ControllerNode> controllerNodeList = new ArrayList<>();
     private List<ServiceNode> serviceNodeList=new ArrayList<>();
     private List<MapperNode> mapperNodeList=new ArrayList<>();
-    private List<EntityNode> entityNodeList=new ArrayList<>();
+    private List<EntityNode> entityNodeList=new ArrayList<>();*/
+    
+    private List<ControllerNode> controllerNodeList = new ArrayList<>();
+    private Map<String,ServiceNode> serviceNodeMap=new HashMap<>();
+    private Map<String,MapperNode> mapperNodeMap=new HashMap<>();
+    private Map<String,EntityNode> entityNodeMap=new HashMap<>();
+    
     
     public AbsDocGenerator(AbsControllerParser controllerParser,AbsServiceParser serviceParser,AbsMapperParser mapperParser,EntityParser entityParser, IControllerDocBuilder controllerDocBuilder) {
         this.controllerParser = controllerParser;
@@ -46,17 +54,19 @@ public abstract class AbsDocGenerator{
     public void generateDocs(){
         LogUtils.info("generate api docs start...");
         
-        LogUtils.info("generate api docs for controller...");
-        //generateControllersDocs();
-       
-        LogUtils.info("generate api docs for service...");
-        generateServicessDocs();
-       
+        LogUtils.info("generate api docs for entity...");
+        generateEntitysDocs();
+        
         LogUtils.info("generate api docs for mapper...");
         generateMapperssDocs();
         
-        LogUtils.info("generate api docs for entity...");
-        generateEntitysDocs();
+        LogUtils.info("generate api docs for service...");
+        generateServicessDocs();
+        
+        
+        LogUtils.info("generate api docs for controller...");
+        generateControllersDocs();
+      
         
         generateIndex(docFileNameList);
         LogUtils.info("generate api docs done !!!");
@@ -67,7 +77,7 @@ public abstract class AbsDocGenerator{
 		for (File entityFile : entityFiles) {
 			try{
 				EntityNode eNode=entityParser.parse(entityFile);
-				entityNodeList.add(eNode);
+				entityNodeMap.put(eNode.getClassName(), eNode);
 			}catch(Exception e){
 				LogUtils.error("generate docs for mapper file : "+entityFile.getName(), e);
 			}
@@ -79,8 +89,8 @@ public abstract class AbsDocGenerator{
 		File[] mapperFiles=DocContext.getMapperFile();
 		for (File mapperFile : mapperFiles) {
 			try{
-				MapperNode mNode=mapperParser.parse(mapperFile);
-				mapperNodeList.add(mNode);
+				MapperNode mNode=mapperParser.parse(mapperFile,entityNodeMap);
+				mapperNodeMap.put(mNode.getMapperName(),mNode);
 			}catch(Exception e){
 				LogUtils.error("generate docs for mapper file : "+mapperFile.getName(), e);
 			}
@@ -92,8 +102,8 @@ public abstract class AbsDocGenerator{
 		File[] serviceFiles=DocContext.getServiceFiles();
 		for (File serviceFile : serviceFiles) {
 			try{
-				 ServiceNode sNode=serviceParser.parse(serviceFile);
-				 serviceNodeList.add(sNode);
+				 ServiceNode sNode=serviceParser.parse(serviceFile,mapperNodeMap);
+				 serviceNodeMap.put(sNode.getServiceName(),sNode);
 				 LogUtils.info("start to parse service file : %s", serviceFile.getName());
 			}catch(Exception e){
 				LogUtils.error("generate docs for service file : "+serviceFile.getName(), e);
@@ -107,7 +117,7 @@ public abstract class AbsDocGenerator{
         for (File controllerFile : controllerFiles) {
             try {
                 LogUtils.info("start to parse controller file : %s", controllerFile.getName());
-                ControllerNode controllerNode = controllerParser.parse(controllerFile);
+                ControllerNode controllerNode = controllerParser.parse(controllerFile,serviceNodeMap);
                 if(controllerNode.getRequestNodes().isEmpty()){
                     continue;
                 }
@@ -128,6 +138,9 @@ public abstract class AbsDocGenerator{
     public List<ControllerNode> getControllerNodeList(){
         return controllerNodeList;
     }
-
+    
+    
+    
+    
 	abstract void generateIndex(List<String> docFileNameList);
 }

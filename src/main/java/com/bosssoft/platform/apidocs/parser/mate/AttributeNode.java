@@ -2,7 +2,7 @@ package com.bosssoft.platform.apidocs.parser.mate;
 
 public class AttributeNode {
    
-	private Boolean isPrimaryKey;
+	private Boolean isPrimaryKey=false;
 	
 	//属性名
 	private String attributeName;

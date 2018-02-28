@@ -3,20 +3,25 @@ package com.bosssoft.platform.apidocs.parser.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
+import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
@@ -27,8 +32,10 @@ public abstract  class AbsServiceParser {
 	private CompilationUnit compilationUnit;
     private ServiceNode serviceNode;
     private File javaFile;
+    private Map<String,MapperNode> mapperNodeMap=new HashMap<>();
     
-    public ServiceNode parse(File javaFile){
+    public ServiceNode parse(File javaFile,Map<String,MapperNode> mapperNodeMap){
+    	this.mapperNodeMap=mapperNodeMap;
     	this.javaFile=javaFile;
     	this.compilationUnit= ParseUtils.compilationUnit(javaFile);
     	this.serviceNode=new ServiceNode();
@@ -45,6 +52,9 @@ public abstract  class AbsServiceParser {
  
     		//解析方法的注释 
     		parseMethodDocs(declaration,implementDeclaration);
+    		
+    		//解析该service调用的mapper
+    		parseAutowireMapper(declaration);
     	}
     	
     	
@@ -52,19 +62,22 @@ public abstract  class AbsServiceParser {
     	return serviceNode;
     }
 
-	/*private ClassOrInterfaceDeclaration getServiceInterface(ClassOrInterfaceDeclaration declaration) {
-		String  implementClassName=declaration.getImplementedTypes(0).getNameAsString();
-		File modelJavaFile=ParseUtils.searchJavaFile(javaFile, implementClassName);
-		ClassOrInterfaceDeclaration cid = null;
-		List<ClassOrInterfaceDeclaration> list = ParseUtils.compilationUnit(modelJavaFile).getChildNodesByType(ClassOrInterfaceDeclaration.class);
-		for (ClassOrInterfaceDeclaration classOrInterfaceDeclaration : list) {
-			if (implementClassName.endsWith(classOrInterfaceDeclaration.getNameAsString())) {
-				cid = classOrInterfaceDeclaration; 
-				break;
+	
+
+	private void parseAutowireMapper(ClassOrInterfaceDeclaration declaration) {
+		List<FieldDeclaration> fieldList=declaration.getFields();
+		for (FieldDeclaration fieldDeclaration : fieldList) {
+			VariableDeclarator variable=fieldDeclaration.getVariable(0);
+			String fieldType=variable.getType().asString();
+			if(IsMapperExist(fieldType)) {
+				Explain explain=new Explain();
+				explain.setType(fieldType);
+				explain.setDescription(mapperNodeMap.get(fieldType).getDescription());
+				serviceNode.addAutowiredMapper(explain);
 			}
+				
 		}
-		return cid;
-	}*/
+	}
 
 	private void parseMethodDocs(ClassOrInterfaceDeclaration declaration, ClassOrInterfaceDeclaration implementDeclaration) {
 		List<MethodDeclaration> implementMethodDeclarationList=getMethodDeclaration(implementDeclaration);
@@ -81,7 +94,7 @@ public abstract  class AbsServiceParser {
 			}
 	    	
 	    	//返回类型
-	    	interfaceNode.setReturnNode(ParseUtils.constructReturnNode(m));
+	    	interfaceNode.setReturnNode(ParseUtils.constructReturnNode(javaFile,m));
 	    	
 	    	//抛出的异常类型
 	    	NodeList<ReferenceType> exceptionList=m.getThrownExceptions();
@@ -170,6 +183,14 @@ public abstract  class AbsServiceParser {
 		if (serviceNode.getDescription() == null) {
 			serviceNode.setDescription(declaration.getNameAsString());
 		}
+		
+		serviceNode.setServiceName(implementDeclaration.getNameAsString());
 
 	}
+	
+	private  Boolean IsMapperExist(String mapperName){
+    	if(mapperNodeMap.get(mapperName)!=null) return true;
+    	else return false;
+    }
+
 }
