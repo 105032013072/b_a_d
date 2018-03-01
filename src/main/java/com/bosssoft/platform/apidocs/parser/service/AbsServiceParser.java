@@ -14,6 +14,7 @@ import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
+import com.bosssoft.platform.common.utils.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -108,6 +109,9 @@ public abstract  class AbsServiceParser {
 	    	Javadoc javadoc=getMethodDoc(m,declaration);
 	    	if(javadoc!=null){
 	    		ParseUtils.parserMethodNotes(interfaceNode, javadoc);
+	    	}
+	    	if(StringUtils.isNullOrBlank(interfaceNode.getDescription())){
+	    		interfaceNode.setDescription(interfaceNode.getMethodName());
 	    	}
 	    	serviceNode.addInterfaceNodes(interfaceNode);
 		}

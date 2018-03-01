@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${description}</title>
+<script src="https://cdn.bootcss.com/prettify/r298/prettify.min.js"></script>
+<link href="https://cdn.bootcss.com/prettify/r298/prettify.min.css" rel="stylesheet">
+<link href="../style.css" rel="stylesheet" />
+</head>
+<body onload="PR.prettyPrint()">
+<div id="wmd-preview" class="wmd-preview">
+<h1> ${description}:</h1>
+<ul class="toc">
+	<#list interfaceNodes as interfaceNode>
+	 <li><a href="#${interfaceNode.methodName}">${interfaceNode.description}</a></li>
+	</#list>
+</ul>
+<hr>
+
+<h2 id="对应实体">对应实体</h2>
+ <#if (relationEntity)??>
+ <p><a href="../entity/${relationEntity.type}.html"> ${relationEntity.description}</a></p>
+ <#else> 
+  <p>无</p>
+ </#if>
+<hr>
+
+
+
+<#list interfaceNodes as interfaceNode>
+	<h2 id="${interfaceNode.methodName}">${interfaceNode.description}</h2>
+  <p><strong>方法名:</strong> &nbsp&nbsp${interfaceNode.methodName}</p>
+  <p><strong>参数列表:</strong></p>
+  <table>
+   <tr>
+    		<th>参数名</th>
+    		<th>类型</th>
+    		<th>描述</th>
+   </tr>
+   <#list interfaceNode.paramNodes as paramNode>
+   <tr>
+         <td >${paramNode.name}</td>
+         <td >${paramNode.type}</td>
+         <td >${paramNode.description}</td>
+   </tr>
+   </#list>
+  </table>
+  
+  <#if (interfaceNode.throwsNode)??>
+  <p><strong>异常列表:</strong></p>
+  <table>
+   <tr>
+    		<th>异常类型</th>
+    		<th>描述</th>
+   </tr>
+   <#list interfaceNode.throwsNode as throws>
+   <tr>
+         <td >${throws.type}</td>
+         <td >${throws.description?default("")}</td>
+   </tr>
+   </#list>
+  </table>
+  
+  <#else>
+   <p><strong>异常列表: 无</strong></p>
+ </#if>
+  
+  <p><strong>返回类型: </strong>${interfaceNode.returnNode.type?html}&nbsp&nbsp${interfaceNode.returnNode.description?default("")}</p>
+  <#if (interfaceNode.returnNode.jsonString)??>
+  <pre class="prettyprint lang-json">${interfaceNode.returnNode.jsonString}</pre>
+ </#if>
+ <hr>
+</#list>
+
+
+</div>
+</body>
+</html>

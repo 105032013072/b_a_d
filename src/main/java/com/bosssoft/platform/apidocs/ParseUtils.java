@@ -647,7 +647,23 @@ public class ParseUtils {
 				interfaceNode.getReturnNode().setDescription(javadocBlockTag.getContent().toText());
 	    	}else if("throws".equals(tagName)){
 	    	   String excceptonName=javadocBlockTag.getName();
-	    	   if(excceptonName!=null){
+	    	   String desc="";
+	    	   if(excceptonName==null){
+	    		   String[] context=javadocBlockTag.getContent().toText().split(" ");
+	    		   excceptonName=context[0];
+	    		   if(context.length>=2) desc=context[1];
+	    	  }
+	    	   
+	    	   Explain exp=interfaceNode.getThrowsNodeByName(excceptonName);
+    		   if(exp==null){
+    			   exp=new Explain();
+    			   exp.setDescription(desc);
+    			   interfaceNode.addThrowsNode(exp);
+    		   }else {
+    			   exp.setDescription(desc);
+    		   }
+	    	   
+	    	  /* if(excceptonName!=null){
 	    		   Explain exp=interfaceNode.getThrowsNodeByName(excceptonName);
 	    		   if(exp==null){
 	    			   exp=new Explain();
@@ -656,7 +672,7 @@ public class ParseUtils {
 	    		   }else {
 	    			   exp.setDescription(javadocBlockTag.getContent().toText());
 	    		   }
-	    	   }
+	    	   }*/
 	    	}
 		}
 	    

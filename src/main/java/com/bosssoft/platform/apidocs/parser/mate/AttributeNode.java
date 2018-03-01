@@ -13,7 +13,7 @@ public class AttributeNode {
 	//对应列名
     private String columnName;
     
-    private String description;
+    private String description="";
 
 	public Boolean getIsPrimaryKey() {
 		return isPrimaryKey;

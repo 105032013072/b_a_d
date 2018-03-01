@@ -17,10 +17,14 @@ public class RequestNode {
     private List<String> method = new ArrayList<>();
     private String url;
     private String description;
+    private String methodName;
     private List<ParamNode> paramNodes = new ArrayList<>();
     private List<HeaderNode> header = new ArrayList<>();
     private Boolean deprecated = Boolean.FALSE;
     private ResponseNode responseNode;
+    private String responseJson;
+    private String  androidCodeUrl;
+    private String  iOSCodeUrl;
 
     public List<String> getMethod() {
         if(method == null || (method != null && method.size() == 0)) {
@@ -101,4 +105,38 @@ public class RequestNode {
         }
         return null;
     }
+
+	public String getAndroidCodeUrl() {
+		return androidCodeUrl;
+	}
+
+	public void setAndroidCodeUrl(String androidCodeUrl) {
+		this.androidCodeUrl = androidCodeUrl;
+	}
+
+	public String getiOSCodeUrl() {
+		return iOSCodeUrl;
+	}
+
+	public void setiOSCodeUrl(String iOSCodeUrl) {
+		this.iOSCodeUrl = iOSCodeUrl;
+	}
+
+	public String getResponseJson() {
+		return responseJson;
+	}
+
+	public void setResponseJson(String responseJson) {
+		this.responseJson = responseJson;
+	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+    
+    
 }

@@ -8,6 +8,7 @@ import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
+import com.bosssoft.platform.common.utils.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -201,6 +202,7 @@ public abstract class AbsControllerParser {
 			if(m.getAnnotationByName("ApiDoc")!=null){
 				AnnotationExpr an=m.getAnnotationByName("ApiDoc");
 				RequestNode requestNode = new RequestNode();
+				requestNode.setMethodName(ParseUtils.parserMethodName(m));
                 if( m.getAnnotationByClass(Deprecated.class)!=null) requestNode.setDeprecated(true);
                 
                 //方法上的注释（说明以及param）
@@ -262,6 +264,9 @@ public abstract class AbsControllerParser {
                 ParseUtils.parseResponseNode(resultJavaFile, responseNode);
                 requestNode.setResponseNode(responseNode);
 
+                if(StringUtils.isNullOrBlank(requestNode.getDescription())){
+                	requestNode.setDescription(requestNode.getMethodName());
+                }
                 controllerNode.addRequestNode(requestNode);
 			}
 		}

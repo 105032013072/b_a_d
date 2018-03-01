@@ -63,6 +63,10 @@ public class EntityParser {
 			Javadoc fielddoc=fieldDeclaration.getJavadoc();
 			if(fielddoc!=null){
 				attributeNode.setDescription(fielddoc.getDescription().toText());
+			}else{
+				if(fieldDeclaration.getComment()!=null){
+					attributeNode.setDescription(fieldDeclaration.getComment().getContent());
+				}
 			}
 			
 			//注解
@@ -81,6 +85,9 @@ public class EntityParser {
 				}
 			}
 			
+			if(attributeNode.getIsPrimaryKey()){
+				attributeNode.setDescription("主键，"+attributeNode.getDescription());
+			}
 			entityNode.addAttributeNode(attributeNode);
 		}
 	}
@@ -109,6 +116,7 @@ public class EntityParser {
 	        }
 		}
 		
+		if(entityNode.getDescription()==null) entityNode.setDescription(cid.getNameAsString());
 	}
 	
 	
