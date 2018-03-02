@@ -124,7 +124,7 @@ public abstract class AbsControllerParser {
             controllerNode.setDescription(c.getNameAsString());
         }
         
-        controllerNode.setControlelrName(c.getNameAsString());
+        controllerNode.setClassName(c.getNameAsString());
 
     }
 

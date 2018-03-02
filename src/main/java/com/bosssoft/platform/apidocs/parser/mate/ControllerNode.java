@@ -8,32 +8,14 @@ import java.util.List;
  *
  * @author yeguozhong yedaxia.github.com
  */
-public class ControllerNode {
+public class ControllerNode extends AbsNode{
 
-	private String controlelrName;//类名
-    private String author;
-    private String description;
     private String baseUrl;
     private List<Explain> autowiredServiceList= new ArrayList<>();
 
     private List<RequestNode> requestNodes = new ArrayList<>();
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
+    
     public String getBaseUrl() {
         return baseUrl == null ? "" : baseUrl;
     }
@@ -54,13 +36,6 @@ public class ControllerNode {
         requestNodes.add(requestNode);
     }
 
-	public String getControlelrName() {
-		return controlelrName;
-	}
-
-	public void setControlelrName(String controlelrName) {
-		this.controlelrName = controlelrName;
-	}
 
 	public List<Explain> getAutowiredServiceList() {
 		return autowiredServiceList;
@@ -73,7 +48,7 @@ public class ControllerNode {
 	public void addAutowiredService(Explain autowiredService){
 		this.autowiredServiceList.add(autowiredService);
 	}
-    
+
     
     
 }

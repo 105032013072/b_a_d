@@ -188,7 +188,7 @@ public abstract  class AbsServiceParser {
 			serviceNode.setDescription(declaration.getNameAsString());
 		}
 		
-		serviceNode.setServiceName(implementDeclaration.getNameAsString());
+		serviceNode.setClassName(implementDeclaration.getNameAsString());
 
 	}
 	

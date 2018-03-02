@@ -3,16 +3,16 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>API列表</title>
+<title>${type}</title>
 <link href="style.css" rel="stylesheet" /> 
 </head>
 <body>
 <div id="wmd-preview" class="wmd-preview">
-  <h1>${type} 列表:</h1>
+  <h1>${type}:</h1>
   <ul class="toc">
   
-  <#list nodes?keys as key>
-     <li><a href="${key}">${nodes[key]}</a></li>
+  <#list nodes as link>
+     <li><a href="${link.linkUrl}">${link.linkDesc}</a></li>
   </#list>
   </ul>
 </div>	

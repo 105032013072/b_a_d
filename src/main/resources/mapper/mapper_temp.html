@@ -30,6 +30,7 @@
 <#list interfaceNodes as interfaceNode>
 	<h2 id="${interfaceNode.methodName}">${interfaceNode.description}</h2>
   <p><strong>方法名:</strong> &nbsp&nbsp${interfaceNode.methodName}</p>
+  <#if  ((interfaceNode.paramNodes)?size>0)>
   <p><strong>参数列表:</strong></p>
   <table>
    <tr>
@@ -45,8 +46,13 @@
    </tr>
    </#list>
   </table>
+  <#else>
+  <p><strong>参数列表:</strong>无</p>
+  </#if>
   
-  <#if (interfaceNode.throwsNode)??>
+  
+  
+  <#if  ((interfaceNode.throwsNode)?size>0)>
   <p><strong>异常列表:</strong></p>
   <table>
    <tr>

@@ -129,7 +129,7 @@ public abstract class AbsMapperParser {
 			mapperNode.setDescription(declaration.getNameAsString());
 		}
 
-		mapperNode.setMapperName(declaration.getNameAsString());
+		mapperNode.setClassName(declaration.getNameAsString());
 
 	}
 	

@@ -11,6 +11,7 @@ import com.bosssoft.platform.apidocs.parser.controller.SpringControllerParser;
 import com.bosssoft.platform.apidocs.parser.entity.EntityParser;
 import com.bosssoft.platform.apidocs.parser.mapper.AbsMapperParser;
 import com.bosssoft.platform.apidocs.parser.mapper.MybatisMapperParser;
+import com.bosssoft.platform.apidocs.parser.mate.Model;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.apidocs.parser.service.AbsServiceParser;
 import com.bosssoft.platform.apidocs.parser.service.SpringServiceParser;
@@ -45,6 +46,7 @@ public class DocContext {
 	private static List<File> serviceFiles;
 	private static List<File> mapperFile;
 	private static List<File> entityFiles;
+	private static Map<String,Model> modelMap;
 	
 	private static IResponseWrapper responseWrapper;
 	private static Docs.DocsConfig config;
@@ -130,11 +132,19 @@ public class DocContext {
 			}
 		}
 
+		loadProjectModel(javaSrcDir);
 		loadControlelrFile(projectType, javaSrcDir);
 		loadServiceFile(projectType, javaSrcDir);
 		loadMapperFile(javaSrcDir);
 		loadEntityFile(javaSrcDir);
 
+	}
+
+	private static void loadProjectModel(File javaSrcDir) {
+	    modelMap=new LinkedHashMap<>();
+	    Model model=new Model();
+	    model.setModelName("登录模块");
+	    modelMap.put(model.getModelName(), model);
 	}
 
 	private static void loadEntityFile(File javaSrcDir) {
@@ -433,4 +443,10 @@ public class DocContext {
 	public static File[] getEntityFiles(){
 		return entityFiles.toArray(new File[entityFiles.size()]);
 	}
+
+	public static Map<String, Model> getModelMap() {
+		return modelMap;
+	}
+	
+	
 }
