@@ -5,7 +5,7 @@
 <title>${description}</title>
 <script src="https://cdn.bootcss.com/prettify/r298/prettify.min.js"></script>
 <link href="https://cdn.bootcss.com/prettify/r298/prettify.min.css" rel="stylesheet">
-<link href="../style.css" rel="stylesheet" />
+<link href="../../style.css" rel="stylesheet" />
 </head>
 <body onload="PR.prettyPrint()">
 <div id="wmd-preview" class="wmd-preview">
@@ -23,7 +23,7 @@
 	</#list>
 </ul>-->
 	<#list autowiredMapperList as autowiredMapper>
- <p">	<a href="../mapper/${autowiredMapper.type}.html">» ${autowiredMapper.description}</a></p>
+ <p">	<a href="${autowiredMapper.type}">» ${autowiredMapper.description}</a></p>
 	</#list>
 
 <hr>

@@ -73,7 +73,9 @@ public abstract  class AbsServiceParser {
 			if(IsMapperExist(fieldType)) {
 				Explain explain=new Explain();
 				explain.setType(fieldType);
-				explain.setDescription(mapperNodeMap.get(fieldType).getDescription());
+				MapperNode mapperNode= mapperNodeMap.get(fieldType);
+				explain.setType(mapperNode.getHtmlPath());
+				explain.setDescription(mapperNode.getDescription());
 				serviceNode.addAutowiredMapper(explain);
 			}
 				

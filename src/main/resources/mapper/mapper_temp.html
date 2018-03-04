@@ -5,7 +5,7 @@
 <title>${description}</title>
 <script src="https://cdn.bootcss.com/prettify/r298/prettify.min.js"></script>
 <link href="https://cdn.bootcss.com/prettify/r298/prettify.min.css" rel="stylesheet">
-<link href="../style.css" rel="stylesheet" />
+<link href="../../style.css" rel="stylesheet" />
 </head>
 <body onload="PR.prettyPrint()">
 <div id="wmd-preview" class="wmd-preview">
@@ -19,7 +19,7 @@
 
 <h2 id="对应实体">对应实体</h2>
  <#if (relationEntity)??>
- <p><a href="../entity/${relationEntity.type}.html"> ${relationEntity.description}</a></p>
+ <p><a href="${relationEntity.type}"> ${relationEntity.description}</a></p>
  <#else> 
   <p>无</p>
  </#if>

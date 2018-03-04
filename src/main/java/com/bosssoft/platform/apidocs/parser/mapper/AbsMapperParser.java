@@ -114,7 +114,9 @@ public abstract class AbsMapperParser {
 		if(IsEntityExist(type)){
 			Explain explain=new Explain();
 			explain.setType(type);
-			explain.setDescription(entityNodeMap.get(type).getDescription());
+			EntityNode entityNode=entityNodeMap.get(type);
+			explain.setDescription(entityNode.getDescription());
+			explain.setType(entityNode.getHtmlPath());
 			 mapperNode.setRelationEntity(explain);
 		}
 		

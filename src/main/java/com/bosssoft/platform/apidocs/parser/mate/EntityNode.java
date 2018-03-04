@@ -13,6 +13,8 @@ public class EntityNode {
 	
 	private String tableName;
 	
+	public String htmlPath;
+	
 	private List<AttributeNode> attributeList=new ArrayList<>();
 
 	public String getClassName() {
@@ -57,6 +59,14 @@ public class EntityNode {
 
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+	public String getHtmlPath() {
+		return htmlPath;
+	}
+
+	public void setHtmlPath(String htmlPath) {
+		this.htmlPath = htmlPath;
 	}
 
     

@@ -76,8 +76,9 @@ public abstract class AbsControllerParser {
 			String fieldType=variable.getType().asString();
 			if(IsServiceExist(fieldType)) {
 				Explain explain=new Explain();
-				explain.setType(fieldType);
-				explain.setDescription(serviceNodeMap.get(fieldType).getDescription());
+				ServiceNode serviceNode=serviceNodeMap.get(fieldType);
+				explain.setType(serviceNode.getHtmlPath());
+				explain.setDescription(serviceNode.getDescription());
 				controllerNode.addAutowiredService(explain);
 			}
 				

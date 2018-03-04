@@ -5,7 +5,7 @@
 <title>${description}</title>
 <script src="https://cdn.bootcss.com/prettify/r298/prettify.min.js"></script>
 <link href="https://cdn.bootcss.com/prettify/r298/prettify.min.css" rel="stylesheet">
-<link href="../style.css" rel="stylesheet" />
+<link href="../../style.css" rel="stylesheet" />
 </head>
 <body onload="PR.prettyPrint()">
 <div id="wmd-preview" class="wmd-preview">
@@ -20,7 +20,7 @@
 <h2 id="调用service">调用service</h2>
 
 	<#list autowiredServiceList as autowiredService>
- <p">	<a href="../service/${autowiredService.type}.html">» ${autowiredService.description}</a></p>
+ <p">	<a href="${autowiredService.type}">» ${autowiredService.description}</a></p>
 	</#list>
 
 <hr>
@@ -58,7 +58,7 @@
   </#if>
   
   
-  <p>返回结果: <a href="../${requestNode.androidCodeUrl}">Android Code</a> | <a href="../${requestNode.iOSCodeUrl}">IOS Code</a></p>
+  <p>返回结果: <a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
   <pre class="prettyprint lang-json">
    ${requestNode.responseJson}
   </pre>

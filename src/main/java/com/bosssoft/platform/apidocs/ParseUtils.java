@@ -703,5 +703,18 @@ public class ParseUtils {
 	  return result;
   }
     
-    
+  public static String getFeildDoc(FieldDeclaration fieldDeclaration){
+	  String doc=null;
+	  Javadoc javadoc=fieldDeclaration.getJavadoc();
+	  if(javadoc!=null) {
+		 doc=javadoc.toText();
+	  }else if(fieldDeclaration.getComment()!=null){
+		  doc=fieldDeclaration.getComment().getContent();
+	  }else{
+		  
+	  }
+	  return doc;
+  }  
+  
+  
 }

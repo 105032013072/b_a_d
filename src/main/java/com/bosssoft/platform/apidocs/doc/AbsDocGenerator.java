@@ -38,6 +38,7 @@ import freemarker.template.Template;
 
 public abstract class AbsDocGenerator{
 
+	private String cssPath;
     private AbsControllerParser controllerParser;
     private AbsServiceParser serviceParser;
     private AbsMapperParser mapperParser;
@@ -67,6 +68,11 @@ public abstract class AbsDocGenerator{
      * generate api Docs
      */
     public void generateDocs(){
+    	
+    	LogUtils.info("create html resource...");
+        createhtmlResource();
+    	
+    	
         LogUtils.info("generate api docs start...");
         
         LogUtils.info("generate api docs for entity...");
@@ -88,11 +94,23 @@ public abstract class AbsDocGenerator{
     }
 
 
-	private void generateIndexDocs() {
+	private void createhtmlResource() {
 		//复制资源到目标目录
 		try{
 			String orign = Thread.currentThread().getContextClassLoader().getResource("").toURI().getPath()+ File.separator + "style.css";
 			FileUtils.copy(new File(orign), new File(DocContext.getDocPath()), true);
+		    cssPath=DocContext.getDocPath()+File.separator + "style.css";
+		}catch(Exception e){
+			LogUtils.error(" faild to  create html resource",e);
+		}
+		
+		
+	}
+
+	private void generateIndexDocs() {
+		
+		try{
+			
 			Map<String,Object> dataModel=new HashMap<>();
 			List<Link> modelList=new ArrayList<>();
 			
@@ -101,6 +119,7 @@ public abstract class AbsDocGenerator{
 				//controller
 				dataModel.put("type", "页面控制器");
 				dataModel.put("nodes", entity.getValue().getControllerLinks());
+			    dataModel.put("cssPath", cssPath);
 				String controlelrhtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"controller_index.html";
 				HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
 				
@@ -108,15 +127,17 @@ public abstract class AbsDocGenerator{
 				dataModel.clear();
 				dataModel.put("type", "服务接口");
 				dataModel.put("nodes", entity.getValue().getServiceLinks());
+				 dataModel.put("cssPath", cssPath);
 				String servicehtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"service_index.html";
-				HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
+				HtmlDocBuilder.buildHtml(dataModel, servicehtmlPath, HtmlType.CLASSINDEX);
 				
 				//mapper
 				dataModel.clear();
 				dataModel.put("type", "数据访问接口");
 				dataModel.put("nodes", entity.getValue().getServiceLinks());
+				 dataModel.put("cssPath", cssPath);
 				String mapperhtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"mapper_index.html";
-				HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
+				HtmlDocBuilder.buildHtml(dataModel, mapperhtmlPath, HtmlType.CLASSINDEX);
 				
 				//模块首页
 				dataModel.clear();
@@ -129,17 +150,19 @@ public abstract class AbsDocGenerator{
 				list.add(mapperLink);
 				dataModel.put("type", entity.getKey()+" 功能设计");
 				dataModel.put("nodes", list);
+				 dataModel.put("cssPath", cssPath);
 				String path=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+entity.getKey()+".html";
-				HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
+				HtmlDocBuilder.buildHtml(dataModel, path, HtmlType.CLASSINDEX);
 				
 				Link modelLink=new Link(entity.getKey(), path);
-				modelList.add(mapperLink);
+				modelList.add(modelLink);
 			}
 			
 			//模块首页
 			dataModel.clear();
 			dataModel.put("type", "功能设计");
 			dataModel.put("nodes", modelList);
+			 dataModel.put("cssPath", cssPath);
 			String modelIndexpath=DocContext.getDocPath()+File.separator+"model_index.html";
 			HtmlDocBuilder.buildHtml(dataModel, modelIndexpath, HtmlType.CLASSINDEX);
 		
@@ -147,6 +170,7 @@ public abstract class AbsDocGenerator{
 			dataModel.clear();
 			dataModel.put("type", "数据实体");
 			dataModel.put("nodes", entityHtmlList);
+			 dataModel.put("cssPath", cssPath);
 			String entityIndexpath=DocContext.getDocPath()+File.separator+"entity_index.html";
 			HtmlDocBuilder.buildHtml(dataModel, entityIndexpath, HtmlType.CLASSINDEX);
 		
@@ -158,8 +182,9 @@ public abstract class AbsDocGenerator{
 			dataModel.clear();
 			dataModel.put("type", DocContext.getDocsConfig().getDocTitle());
 			dataModel.put("nodes", modelList);
+			 dataModel.put("cssPath", cssPath);
 			String path=DocContext.getDocPath()+File.separator+"index.html";
-			HtmlDocBuilder.buildHtml(dataModel, entityIndexpath, HtmlType.CLASSINDEX);
+			HtmlDocBuilder.buildHtml(dataModel, path, HtmlType.CLASSINDEX);
 			
 			/*Map<String,Object> dataModel=new HashMap<>();
 		
@@ -218,9 +243,10 @@ public abstract class AbsDocGenerator{
 				entityNodeMap.put(eNode.getClassName(), eNode);
 				LogUtils.info("start to generate docs for entity file : %s", entityFile.getName());
 				String htmlPath=DocContext.getDocPath()+File.separator+"entity"+File.separator+eNode.getClassName()+".html";
-				 HtmlDocBuilder.buildHtml(eNode, htmlPath, HtmlType.CLASSENTITY);
+				HtmlDocBuilder.buildHtml(eNode, htmlPath, HtmlType.CLASSENTITY);
 				 Link link=new Link(eNode.getDescription(), htmlPath);
 				 entityHtmlList.add(link);
+				 eNode.setHtmlPath(htmlPath);
 			}catch(Exception e){
 				LogUtils.error("generate docs for entity file : "+entityFile.getName(), e);
 			}
@@ -287,6 +313,7 @@ public abstract class AbsDocGenerator{
                 }
                 controllerNodeList.add(controllerNode);
                 LogUtils.info("start to generate docs for controller file : %s", controllerFile.getName());
+                controllerNode.setModelName("登录模块");
                /* String controllerDocs = controllerDocBuilder.buildDoc(controllerNode);
                 String docName = controllerNode.getDescription();
                 docFileNameList.add(docName);
@@ -296,17 +323,17 @@ public abstract class AbsDocGenerator{
                 List<RequestNode> requestNodeList= controllerNode.getRequestNodes();
                 for (RequestNode requestNode : requestNodeList) {
                 	 JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(requestNode.getResponseNode());
-                     String javaurl = javaCodeGenerator.generateCode();
+                     String javaurl =javaCodeGenerator.generateCode();
+                     javaurl=DocContext.getDocPath()+File.separator+javaurl;
                      requestNode.setAndroidCodeUrl(javaurl);
                      
                      ModelCodeGenerator iosCodeGenerator = new ModelCodeGenerator(requestNode.getResponseNode());
                      String iosUrl = iosCodeGenerator.generateCode();
+                     iosUrl=DocContext.getDocPath()+File.separator+iosUrl;
                      requestNode.setiOSCodeUrl(iosUrl);
                      
                      requestNode.setResponseJson(requestNode.getResponseNode().toJsonApi());
 				}
-                
-                controllerNode.setModelName("登录模块");
                 
                 String htmlPath=DocContext.getDocPath()+File.separator+controllerNode.getModelName()+File.separator+"controller"+File.separator+controllerNode.getClassName()+".html";
 				 HtmlDocBuilder.buildHtml(controllerNode, htmlPath, HtmlType.CLASSCONTROLLER);
