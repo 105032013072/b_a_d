@@ -91,6 +91,13 @@ public abstract class AbsDocGenerator{
         
         //generateIndex(docFileNameList);
         LogUtils.info("generate api docs done !!!");
+        
+        
+        //生成word
+		WordDocBuilder wordDocBuilder = new WordDocBuilder(controllerNodeList,
+				new ArrayList<ServiceNode>(serviceNodeMap.values()), new ArrayList<MapperNode>(mapperNodeMap.values()),
+				new ArrayList<EntityNode>(entityNodeMap.values()));
+		wordDocBuilder.buidWordDoc();
     }
 
 

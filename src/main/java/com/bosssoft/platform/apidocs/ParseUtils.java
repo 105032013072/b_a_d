@@ -320,12 +320,13 @@ public class ParseUtils {
                     for (VariableDeclarator v : variableList) {
                     	 FieldNode fieldNode = new FieldNode();
                          responseNode.addChildNode(fieldNode);
-                         if(fd.getComment()!=null){
+                         /*if(fd.getComment()!=null){
                         	 fieldNode.setDescription(fd.getComment().getContent());
                          }
                          if(!Utils.isNotEmpty(fieldNode.getDescription())){
                               if(v.getComment()!=null) fieldNode.setDescription(Utils.cleanCommentContent(v.getComment().getContent()));
-                         }
+                         }*/
+                         fieldNode.setDescription(ParseUtils.getFeildDoc(fd));
                          
                         // fd.getAnnotationByName("RapMock")
                         AnnotationExpr  an =fd.getAnnotationByName("RapMock");
@@ -711,7 +712,10 @@ public class ParseUtils {
 	  }else if(fieldDeclaration.getComment()!=null){
 		  doc=fieldDeclaration.getComment().getContent();
 	  }else{
-		  
+		  NodeList<VariableDeclarator> list= fieldDeclaration.getVariables();
+		  for (VariableDeclarator v : list) {          
+			  if(v.getComment()!=null) doc=Utils.cleanCommentContent(v.getComment().getContent());
+		}
 	  }
 	  return doc;
   }  

@@ -60,14 +60,8 @@ public class EntityParser {
 			attributeNode.setAttributeName(variable.getNameAsString());
 			attributeNode.setAttributeType(variable.getType().toString());
 			
-			Javadoc fielddoc=fieldDeclaration.getJavadoc();
-			if(fielddoc!=null){
-				attributeNode.setDescription(fielddoc.getDescription().toText());
-			}else{
-				if(fieldDeclaration.getComment()!=null){
-					attributeNode.setDescription(fieldDeclaration.getComment().getContent());
-				}
-			}
+			String doc=ParseUtils.getFeildDoc(fieldDeclaration);
+		   attributeNode.setDescription(doc);
 			
 			//注解
 			NodeList<AnnotationExpr> annotationList= fieldDeclaration.getAnnotations();

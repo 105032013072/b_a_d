@@ -1,21 +1,39 @@
 package com.bosssoft;
+import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.net.StandardSocketOptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.filechooser.FileSystemView;
+
 import org.junit.Test;
 
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.WordUtils;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
+import com.bosssoft.platform.common.utils.FileUtils;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.lowagie.text.Cell;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Table;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.rtf.RtfWriter2;
+import com.lowagie.text.rtf.style.RtfFont;
+import com.lowagie.text.rtf.style.RtfParagraphStyle;
 
 public class MyTest {
    
@@ -47,6 +65,117 @@ public class MyTest {
 		}
 			
 			
+	}
+	
+	
+	@Test
+	public void testDoc() throws Exception{
+		Document document = new Document(PageSize.A5.rotate()); 
+		String path="d:\\test.doc";
+		
+		if(!new File(path).exists()) FileUtils.mkdir(new File(path), false);
+		
+		RtfWriter2.getInstance(document, new FileOutputStream("d:\\test.doc")); 
+		document.open(); 
+		Font titleFont = new Font(Font.NORMAL,16, Font.BOLD); 
+			//设置标题1格式	 
+		RtfParagraphStyle rtfGsBt1 = RtfParagraphStyle.STYLE_HEADING_1; 
+		rtfGsBt1.setAlignment(Element.ALIGN_CENTER); 
+		rtfGsBt1.setStyle(Font.BOLD); 
+		rtfGsBt1.setSize(14); 
+			//设置标题2格式	 
+		RtfParagraphStyle rtfGsBt2 = RtfParagraphStyle.STYLE_HEADING_2; 
+		rtfGsBt2.setAlignment(Element.ALIGN_LEFT); 
+		rtfGsBt2.setStyle(Font.NORMAL); 
+		rtfGsBt2.setSize(12); 
+		
+		//Paragraph title = new Paragraph("测试"); 
+		/*title.setAlignment(Element.ALIGN_CENTER); 
+		title.setFont(titleFont); */
+		//document.add(title); 
+		
+		//document.newPage();
+		//正文 
+		Paragraph title = new Paragraph("第一章"); 
+		title.setFont(rtfGsBt1); 
+		document.add(title); 
+		title = new Paragraph("1.1 第一节"); 
+		title.setFont(rtfGsBt2); 
+		document.add(title); 
+		title = new Paragraph("1.2 第二节"); 
+		title.setFont(rtfGsBt2); 
+		document.add(title); 
+		title = new Paragraph("第二章"); 
+		title.setFont(rtfGsBt1); 
+		document.add(title); 
+		title = new Paragraph("2.1 第一节"); 
+		title.setFont(rtfGsBt2); 
+		document.add(title); 
+		title = new Paragraph("2.2 第二节"); 
+		title.setFont(rtfGsBt2); 
+		document.add(title); 
+		
+	   document.close();
+        
+ 
+        /** 正文字体 author:yyli Sep 15, 2010 */
+        RtfFont contextFont = new RtfFont("仿宋_GB2312", 9, Font.NORMAL,
+                Color.BLACK);
+
+        
+        
+        /*Cell cell=null;
+        cell=new Cell(new com.lowagie.text.Paragraph("姓名", contextFont));
+        cell.setBackgroundColor(Color.LIGHT_GRAY);
+        cell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+        table.addCell(cell);
+        
+       
+        cell=new Cell(new com.lowagie.text.Paragraph("性别", contextFont));
+        cell.setBackgroundColor(Color.LIGHT_GRAY);
+        cell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+        table.addCell(cell);
+       
+       
+        cell=new Cell(new com.lowagie.text.Paragraph("身份证号", contextFont));
+        cell.setBackgroundColor(Color.LIGHT_GRAY);
+        cell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+        table.addCell(cell);
+       
+       
+        cell=new Cell(new com.lowagie.text.Paragraph("我", contextFont));
+        table.addCell(cell);
+        
+        cell=new Cell(new com.lowagie.text.Paragraph("女", contextFont));
+        table.addCell(cell);
+        
+        cell=new Cell(new com.lowagie.text.Paragraph("000000000014", contextFont));
+        table.addCell(cell);
+        
+        String[] columns={"姓名","年龄","出生日期"};*/
+        
+        
+        
+       /* 
+        Table aTable =new Table(3);
+		for(String s:columns) {
+		//把表格上方的标题创建出来
+		aTable.addCell(new Cell(s));
+		}
+		//把数据填写到表格中，只要够了表格数量会自动换行
+		for(int i=0;i<=2;i++){
+		aTable.addCell(new Cell("ddd"));
+		aTable.addCell(new Cell("12"));
+		aTable.addCell(new Cell("11"));
+		
+		}
+        
+        document.add(aTable);
+        */
+       /* WordUtils utils=new WordUtils();
+        utils.initDocument("d:\\test.doc", "测试");
+        utils.renderContent("ddddd");
+		utils.endDoc();*/
 	}
 	
     private String getBasicType(Type type) {
@@ -84,4 +213,7 @@ public class MyTest {
 		}
 		return result;
 	}
+	
+	
+	
 }

@@ -246,6 +246,8 @@ public abstract class AbsControllerParser {
                 	
                 }
                 
+                
+                
                 if(resultClassType == null){
                     return;
                 }
