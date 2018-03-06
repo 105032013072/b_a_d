@@ -13,11 +13,16 @@ public class Model {
     
     private String modelLinkUrl;
     
-    private List<Link> controllerLinks=new ArrayList<>();
+   /* private List<Link> controllerLinks=new ArrayList<>();
     
     private List<Link> serviceLinks=new ArrayList<>();
     
-    private List<Link> mapperLinks=new ArrayList<>();
+    private List<Link> mapperLinks=new ArrayList<>();*/
+    private List<ControllerNode> controllerNodeList=new ArrayList<>();
+    
+    private List<ServiceNode> serviceNodeList=new ArrayList<>();
+    
+    private List<MapperNode> mapperNodeList=new ArrayList<>();
 
 	public String getModelName() {
 		return modelName;
@@ -35,39 +40,39 @@ public class Model {
 		this.modelLinkUrl = modelLinkUrl;
 	}
 
-	public List<Link> getControllerLinks() {
-		return controllerLinks;
+	public List<ControllerNode> getControllerNodeList() {
+		return controllerNodeList;
 	}
 
-	public void setControllerLinks(List<Link> controllerLinks) {
-		this.controllerLinks = controllerLinks;
+	public void setControllerNodeList(List<ControllerNode> controllerNodeList) {
+		this.controllerNodeList = controllerNodeList;
 	}
 
-	public List<Link> getServiceLinks() {
-		return serviceLinks;
+	public List<ServiceNode> getServiceNodeList() {
+		return serviceNodeList;
 	}
 
-	public void setServiceLinks(List<Link> serviceLinks) {
-		this.serviceLinks = serviceLinks;
+	public void setServiceNodeList(List<ServiceNode> serviceNodeList) {
+		this.serviceNodeList = serviceNodeList;
 	}
 
-	public List<Link> getMapperLinks() {
-		return mapperLinks;
+	public List<MapperNode> getMapperNodeList() {
+		return mapperNodeList;
 	}
 
-	public void setMapperLinks(List<Link> mapperLinks) {
-		this.mapperLinks = mapperLinks;
+	public void setMapperNodeList(List<MapperNode> mapperNodeList) {
+		this.mapperNodeList = mapperNodeList;
 	}
-    
-    public void addControllerLinks(Link link){
-    	controllerLinks.add(link);
-    }
-    
-    public void addServiceLinks(Link link){
-    	serviceLinks.add(link);
-    }
-    
-    public void addMappLinks(Link link){
-    	mapperLinks.add(link);
-    }
+
+	public void addControlelrNode(ControllerNode node){
+		this.controllerNodeList.add(node);
+	}
+	
+	public void addServiceNode(ServiceNode node){
+		this.serviceNodeList.add(node);
+	}
+	
+	public void addMapperNode(MapperNode node){
+		this.mapperNodeList.add(node);
+	}
 }

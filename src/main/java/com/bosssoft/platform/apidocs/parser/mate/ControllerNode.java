@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author yeguozhong yedaxia.github.com
  */
-public class ControllerNode extends AbsNode{
+public class ControllerNode extends ParentNode{
 
     private String baseUrl;
     private List<Explain> autowiredServiceList= new ArrayList<>();

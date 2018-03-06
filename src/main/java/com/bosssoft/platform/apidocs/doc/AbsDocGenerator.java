@@ -27,6 +27,7 @@ import com.bosssoft.platform.apidocs.parser.mate.EntityNode;
 import com.bosssoft.platform.apidocs.parser.mate.Link;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.Model;
+import com.bosssoft.platform.apidocs.parser.mate.ParentNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.bosssoft.platform.apidocs.parser.service.AbsServiceParser;
@@ -48,7 +49,7 @@ public abstract class AbsDocGenerator{
    /* private Map<String,String> controlelrHtmlMap=new HashMap<>();
     private Map<String,String> serviceHtmlMap=new HashMap<>();
     private Map<String,String> mapperHtmlMap=new HashMap<>();*/
-    private List<Link> entityHtmlList=new ArrayList<>();
+    private List<EntityNode> entityHtmlList=new ArrayList<>();
     
     private List<ControllerNode> controllerNodeList = new ArrayList<>();
     private Map<String,ServiceNode> serviceNodeMap=new HashMap<>();
@@ -94,9 +95,7 @@ public abstract class AbsDocGenerator{
         
         
         //生成word
-		WordDocBuilder wordDocBuilder = new WordDocBuilder(controllerNodeList,
-				new ArrayList<ServiceNode>(serviceNodeMap.values()), new ArrayList<MapperNode>(mapperNodeMap.values()),
-				new ArrayList<EntityNode>(entityNodeMap.values()));
+		WordDocBuilder wordDocBuilder = new WordDocBuilder(new ArrayList<EntityNode>(entityNodeMap.values()),DocContext.getModelMap());
 		wordDocBuilder.buidWordDoc();
     }
 
@@ -119,13 +118,13 @@ public abstract class AbsDocGenerator{
 		try{
 			
 			Map<String,Object> dataModel=new HashMap<>();
-			List<Link> modelList=new ArrayList<>();
+			List<ParentNode> modelList=new ArrayList<>();
 			
 			//创建各个模块的首页
 			for (Entry<String, Model> entity : DocContext.getModelMap().entrySet()) {
 				//controller
 				dataModel.put("type", "页面控制器");
-				dataModel.put("nodes", entity.getValue().getControllerLinks());
+				dataModel.put("nodes", entity.getValue().getControllerNodeList());
 			    dataModel.put("cssPath", cssPath);
 				String controlelrhtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"controller_index.html";
 				HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
@@ -133,7 +132,7 @@ public abstract class AbsDocGenerator{
 				//service
 				dataModel.clear();
 				dataModel.put("type", "服务接口");
-				dataModel.put("nodes", entity.getValue().getServiceLinks());
+				dataModel.put("nodes", entity.getValue().getServiceNodeList());
 				 dataModel.put("cssPath", cssPath);
 				String servicehtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"service_index.html";
 				HtmlDocBuilder.buildHtml(dataModel, servicehtmlPath, HtmlType.CLASSINDEX);
@@ -141,28 +140,44 @@ public abstract class AbsDocGenerator{
 				//mapper
 				dataModel.clear();
 				dataModel.put("type", "数据访问接口");
-				dataModel.put("nodes", entity.getValue().getServiceLinks());
+				dataModel.put("nodes", entity.getValue().getMapperNodeList());
 				 dataModel.put("cssPath", cssPath);
 				String mapperhtmlPath=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+"mapper_index.html";
 				HtmlDocBuilder.buildHtml(dataModel, mapperhtmlPath, HtmlType.CLASSINDEX);
 				
 				//模块首页
 				dataModel.clear();
-				List<Link> list=new ArrayList<>();
-				Link controlelrLink=new Link("页面控制器", controlelrhtmlPath);
+				List<ParentNode> list=new ArrayList<>();
+				/*Link controlelrLink=new Link("页面控制器", controlelrhtmlPath);
 				Link serviceLink=new Link("服务接口",servicehtmlPath);
-				Link mapperLink=new Link("数据访问接口",mapperhtmlPath);
-				list.add(controlelrLink);
-				list.add(serviceLink);
-				list.add(mapperLink);
+				Link mapperLink=new Link("数据访问接口",mapperhtmlPath);*/
+				ParentNode controlelrPNode=new ParentNode();
+				controlelrPNode.setDescription("页面控制器");
+				controlelrPNode.setHtmlPath(controlelrhtmlPath);
+				list.add(controlelrPNode);
+				
+				ParentNode servicePNode=new ParentNode();
+				servicePNode.setDescription("服务接口");
+				servicePNode.setHtmlPath(servicehtmlPath);
+				list.add(servicePNode);
+				
+				ParentNode mapperPNode=new ParentNode();
+				mapperPNode.setDescription("数据访问接口");
+				mapperPNode.setHtmlPath(mapperhtmlPath);
+				list.add(mapperPNode);
+				
+				
 				dataModel.put("type", entity.getKey()+" 功能设计");
 				dataModel.put("nodes", list);
 				 dataModel.put("cssPath", cssPath);
 				String path=DocContext.getDocPath()+File.separator+entity.getKey()+File.separator+entity.getKey()+".html";
 				HtmlDocBuilder.buildHtml(dataModel, path, HtmlType.CLASSINDEX);
 				
-				Link modelLink=new Link(entity.getKey(), path);
-				modelList.add(modelLink);
+				//Link modelLink=new Link(entity.getKey(), path);
+				ParentNode modelPNode=new ParentNode();
+				modelPNode.setDescription(entity.getKey());
+				modelPNode.setHtmlPath(path);
+				modelList.add(modelPNode);
 			}
 			
 			//模块首页
@@ -182,10 +197,15 @@ public abstract class AbsDocGenerator{
 			HtmlDocBuilder.buildHtml(dataModel, entityIndexpath, HtmlType.CLASSINDEX);
 		
 			modelList.clear();
-			Link entityLink=new Link("数据实体", entityIndexpath);
-			modelList.add(entityLink);
-			Link modelLink=new Link("功能设计",modelIndexpath);
-			modelList.add(modelLink);
+			ParentNode entityPNode=new ParentNode();
+			entityPNode.setDescription("数据实体");
+			entityPNode.setHtmlPath(entityIndexpath);
+			modelList.add(entityPNode);
+			
+			ParentNode model=new ParentNode();
+			model.setDescription("功能设计");
+			model.setHtmlPath(modelIndexpath);
+			modelList.add(model);
 			dataModel.clear();
 			dataModel.put("type", DocContext.getDocsConfig().getDocTitle());
 			dataModel.put("nodes", modelList);
@@ -193,48 +213,7 @@ public abstract class AbsDocGenerator{
 			String path=DocContext.getDocPath()+File.separator+"index.html";
 			HtmlDocBuilder.buildHtml(dataModel, path, HtmlType.CLASSINDEX);
 			
-			/*Map<String,Object> dataModel=new HashMap<>();
 		
-			//controlelr 主页
-			dataModel.put("type", "Controller");
-			dataModel.put("nodes", controlelrHtmlMap);
-			String controlelrhtmlPath=DocContext.getDocPath()+File.separator+"controller_index.html";
-			HtmlDocBuilder.buildHtml(dataModel, controlelrhtmlPath, HtmlType.CLASSINDEX);
-			
-			//service 主页
-			dataModel.clear();
-			dataModel.put("type", "Service");
-			dataModel.put("nodes", serviceHtmlMap);
-			String servicehtmlPath=DocContext.getDocPath()+File.separator+"sesrvice_index.html";
-			HtmlDocBuilder.buildHtml(dataModel, servicehtmlPath, HtmlType.CLASSINDEX);
-			
-			//mapper 主页
-			dataModel.clear();
-			dataModel.put("type", "Mapper");
-			dataModel.put("nodes", mapperHtmlMap);
-			String mapperhtmlPath=DocContext.getDocPath()+File.separator+"mapper_index.html";
-			HtmlDocBuilder.buildHtml(dataModel, mapperhtmlPath, HtmlType.CLASSINDEX);
-			
-			//entity 主页
-			dataModel.clear();
-			dataModel.put("type", "Entity");
-			dataModel.put("nodes", entityHtmlMap);
-			String entityhtmlPath=DocContext.getDocPath()+File.separator+"entity_index.html";
-			HtmlDocBuilder.buildHtml(dataModel, entityhtmlPath, HtmlType.CLASSINDEX);
-			
-		   Map<String,String> nodes=new LinkedHashMap<>();
-		 
-		   nodes.put(controlelrhtmlPath, "Controller");
-		   nodes.put(servicehtmlPath, "Service");
-		   nodes.put(mapperhtmlPath, "Mapper");
-		   nodes.put(entityhtmlPath, "Entity");
-		  
-		   dataModel.clear();
-		   dataModel.put("type", DocContext.getDocsConfig().getDocTitle());
-		   dataModel.put("nodes", nodes);
-		   String path=DocContext.getDocPath()+File.separator+"index.html";
-		   HtmlDocBuilder.buildHtml(dataModel, path, HtmlType.CLASSINDEX);*/
-		   
 		}catch(Exception e){
 			LogUtils.error("generate docs for index file faild: ", e);
 		}
@@ -250,10 +229,10 @@ public abstract class AbsDocGenerator{
 				entityNodeMap.put(eNode.getClassName(), eNode);
 				LogUtils.info("start to generate docs for entity file : %s", entityFile.getName());
 				String htmlPath=DocContext.getDocPath()+File.separator+"entity"+File.separator+eNode.getClassName()+".html";
+				eNode.setHtmlPath(htmlPath);
 				HtmlDocBuilder.buildHtml(eNode, htmlPath, HtmlType.CLASSENTITY);
-				 Link link=new Link(eNode.getDescription(), htmlPath);
-				 entityHtmlList.add(link);
-				 eNode.setHtmlPath(htmlPath);
+				 entityHtmlList.add(eNode);
+				
 			}catch(Exception e){
 				LogUtils.error("generate docs for entity file : "+entityFile.getName(), e);
 			}
@@ -274,9 +253,9 @@ public abstract class AbsDocGenerator{
 				LogUtils.info("start to generate docs for mapper file : %s", mapperFile.getName());
 				 String htmlPath=DocContext.getDocPath()+File.separator+mNode.getModelName()+File.separator+"mapper"+File.separator+mNode.getClassName()+".html";
 				 HtmlDocBuilder.buildHtml(mNode, htmlPath, HtmlType.CLASSMAPPER);
-			     Link link=new Link(mNode.getDescription(), htmlPath);
-			     DocContext.getModelMap().get(mNode.getModelName()).addMappLinks(link);
-			     mNode.setHtmlPath(htmlPath);
+				 mNode.setHtmlPath(htmlPath);
+			     DocContext.getModelMap().get(mNode.getModelName()).addMapperNode(mNode);
+			    
 			}catch(Exception e){
 				LogUtils.error("generate docs for mapper file : "+mapperFile.getName(), e);
 			}
@@ -298,10 +277,9 @@ public abstract class AbsDocGenerator{
 				 LogUtils.info("start to generate docs for service file : %s", serviceFile.getName());
 				 String htmlPath=DocContext.getDocPath()+File.separator+sNode.getModelName()+File.separator+"service"+File.separator+sNode.getClassName()+".html";
 				 HtmlDocBuilder.buildHtml(sNode, htmlPath, HtmlType.CLASSSERVICE);
-				
-				 Link link=new Link(sNode.getDescription(), htmlPath);
-				 DocContext.getModelMap().get(sNode.getModelName()).addServiceLinks(link);
 				 sNode.setHtmlPath(htmlPath);
+				 DocContext.getModelMap().get(sNode.getModelName()).addServiceNode(sNode);;
+				 
 			}catch(Exception e){
 				LogUtils.error("generate docs for service file : "+serviceFile.getName(), e);
 			}
@@ -344,11 +322,9 @@ public abstract class AbsDocGenerator{
                 
                 String htmlPath=DocContext.getDocPath()+File.separator+controllerNode.getModelName()+File.separator+"controller"+File.separator+controllerNode.getClassName()+".html";
 				 HtmlDocBuilder.buildHtml(controllerNode, htmlPath, HtmlType.CLASSCONTROLLER);
-                LogUtils.info("success to generate docs for controller file : %s", controllerFile.getName());
-                Link link=new Link(controllerNode.getDescription(), htmlPath);
-                DocContext.getModelMap().get(controllerNode.getModelName()).addControllerLinks(link);
-                
-                controllerNode.setHtmlPath(htmlPath);
+				 controllerNode.setHtmlPath(htmlPath);
+				 LogUtils.info("success to generate docs for controller file : %s", controllerFile.getName());
+                DocContext.getModelMap().get(controllerNode.getModelName()).addControlelrNode(controllerNode);
             } catch (Exception e) {
                 LogUtils.error("generate docs for controller file : "+controllerFile.getName()+" fail", e);
             }

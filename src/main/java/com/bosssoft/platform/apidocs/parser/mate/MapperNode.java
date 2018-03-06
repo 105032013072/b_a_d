@@ -3,7 +3,7 @@ package com.bosssoft.platform.apidocs.parser.mate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapperNode extends AbsNode{
+public class MapperNode extends ParentNode{
 	
 	
     private List<InterfaceNode> interfaceNodes = new ArrayList<>();

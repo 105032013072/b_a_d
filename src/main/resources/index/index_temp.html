@@ -11,8 +11,8 @@
   <h1>${type}:</h1>
   <ul class="toc">
   
-  <#list nodes as link>
-     <li><a href="${link.linkUrl}">${link.linkDesc}</a></li>
+  <#list nodes as node>
+     <li><a href="${node.htmlPath}">${node.description}</a></li>
   </#list>
   </ul>
 </div>	

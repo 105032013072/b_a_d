@@ -1,6 +1,6 @@
 package com.bosssoft.platform.apidocs.parser.mate;
 
-public abstract class AbsNode {
+public  class ParentNode {
   
     public  String modelName;//所属模块名
 	

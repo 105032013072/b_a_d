@@ -12,8 +12,10 @@ import javax.swing.filechooser.FileSystemView;
 
 import org.junit.Test;
 
+import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.WordTitleType;
 import com.bosssoft.platform.apidocs.WordUtils;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.common.utils.FileUtils;
@@ -23,10 +25,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.lowagie.text.Anchor;
 import com.lowagie.text.Cell;
+import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
+import com.lowagie.text.ListItem;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Table;
@@ -67,8 +72,50 @@ public class MyTest {
 			
 	}
 	
-	
 	@Test
+    public void testWordUtil()throws Exception{
+		WordUtils wordUtils=new WordUtils();
+		String docTitle="测试";
+		String path="d:\\test.doc";
+		wordUtils.initDocument(path, docTitle);
+        Document doc=wordUtils.document;
+		
+        wordUtils.renderTitle("第一张", WordTitleType.TITLE_1);
+        
+        Paragraph context = new Paragraph("");    
+        //设置行距    
+       /* context.setLeading(3f);  
+       context.setSpacingBefore(5);  
+        context.setFirstLineIndent(20);
+        Anchor contextlink = new Anchor("service");
+        contextlink.setReference("#1");
+       
+        context.add(contextlink);
+        
+        doc.add(context);*/    
+        
+        
+        context.setLeading(3f);  
+        context.setSpacingBefore(5);  
+         context.setFirstLineIndent(20);
+        context.add(new Chunk("service")); 
+        doc.add(context);
+        doc.newPage();
+        
+        
+		Paragraph pUrl = new Paragraph();
+		Anchor link = new Anchor("www.baidu.com");
+		link.setReference("#service");
+		pUrl.add(link);
+
+		doc.add(pUrl);
+		wordUtils.endDoc();
+    }
+	
+	
+	
+	
+	//@Test
 	public void testDoc() throws Exception{
 		Document document = new Document(PageSize.A5.rotate()); 
 		String path="d:\\test.doc";
@@ -96,7 +143,7 @@ public class MyTest {
 		
 		//document.newPage();
 		//正文 
-		Paragraph title = new Paragraph("第一章"); 
+		/*Paragraph title = new Paragraph("第一章"); 
 		title.setFont(rtfGsBt1); 
 		document.add(title); 
 		title = new Paragraph("1.1 第一节"); 
@@ -113,9 +160,10 @@ public class MyTest {
 		document.add(title); 
 		title = new Paragraph("2.2 第二节"); 
 		title.setFont(rtfGsBt2); 
-		document.add(title); 
+		document.add(title); */
 		
-	   document.close();
+		
+	
         
  
         /** 正文字体 author:yyli Sep 15, 2010 */
@@ -154,9 +202,9 @@ public class MyTest {
         
         String[] columns={"姓名","年龄","出生日期"};*/
         
+        String[] columns={"姓名","年龄","出生日期"};
         
-        
-       /* 
+   
         Table aTable =new Table(3);
 		for(String s:columns) {
 		//把表格上方的标题创建出来
@@ -171,7 +219,8 @@ public class MyTest {
 		}
         
         document.add(aTable);
-        */
+        document.close();
+       
        /* WordUtils utils=new WordUtils();
         utils.initDocument("d:\\test.doc", "测试");
         utils.renderContent("ddddd");

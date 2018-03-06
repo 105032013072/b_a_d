@@ -3,7 +3,7 @@ package com.bosssoft.platform.apidocs.parser.mate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServiceNode extends AbsNode{
+public class ServiceNode extends ParentNode{
 
     
     private List<Explain> autowiredMapperList= new ArrayList<>();
