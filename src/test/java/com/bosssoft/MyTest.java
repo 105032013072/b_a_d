@@ -15,8 +15,8 @@ import org.junit.Test;
 import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
-import com.bosssoft.platform.apidocs.WordTitleType;
 import com.bosssoft.platform.apidocs.WordUtils;
+import com.bosssoft.platform.apidocs.enumtype.WordTitleType;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.common.utils.FileUtils;
 import com.github.javaparser.ast.Modifier;
@@ -36,6 +36,7 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Table;
 import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.rtf.RtfWriter2;
 import com.lowagie.text.rtf.style.RtfFont;
 import com.lowagie.text.rtf.style.RtfParagraphStyle;
@@ -79,10 +80,24 @@ public class MyTest {
 		String path="d:\\test.doc";
 		wordUtils.initDocument(path, docTitle);
         Document doc=wordUtils.document;
-		
-        wordUtils.renderTitle("第一张", WordTitleType.TITLE_1);
+       /* Document document=new Document();
+		PdfWriter.getInstance(document, new FileOutputStream("d:\\test.pdf"));
+        document.open();*/
         
-        Paragraph context = new Paragraph("");    
+        /*Paragraph pUrl = new Paragraph();
+		Anchor link = new Anchor("www.baidu.com");
+		link.setReference("#service");
+		pUrl.add(link);
+		
+		
+		doc.add(pUrl);
+		doc.newPage();
+		
+        wordUtils.renderTitle("1.1 第一张", WordTitleType.TITLE_1,"第一张");
+        
+        doc.newPage();
+        
+        Paragraph context = new Paragraph("");  */
         //设置行距    
        /* context.setLeading(3f);  
        context.setSpacingBefore(5);  
@@ -95,20 +110,17 @@ public class MyTest {
         doc.add(context);*/    
         
         
-        context.setLeading(3f);  
+        /*context.setLeading(3f);  
         context.setSpacingBefore(5);  
          context.setFirstLineIndent(20);
         context.add(new Chunk("service")); 
         doc.add(context);
-        doc.newPage();
+        doc.newPage();*/
         
+   
+       
         
-		Paragraph pUrl = new Paragraph();
-		Anchor link = new Anchor("www.baidu.com");
-		link.setReference("#service");
-		pUrl.add(link);
-
-		doc.add(pUrl);
+		
 		wordUtils.endDoc();
     }
 	

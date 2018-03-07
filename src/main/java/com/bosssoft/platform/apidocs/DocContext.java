@@ -1,5 +1,6 @@
 package com.bosssoft.platform.apidocs;
 
+import com.bosssoft.platform.apidocs.enumtype.ProjectType;
 import com.bosssoft.platform.apidocs.parser.*;
 import com.bosssoft.platform.apidocs.parser.controller.AbsControllerParser;
 import com.bosssoft.platform.apidocs.parser.controller.GenericControllerParser;

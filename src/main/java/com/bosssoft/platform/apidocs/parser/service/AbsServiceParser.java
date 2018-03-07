@@ -72,7 +72,7 @@ public abstract  class AbsServiceParser {
 			String fieldType=variable.getType().asString();
 			if(IsMapperExist(fieldType)) {
 				Explain explain=new Explain();
-				explain.setType(fieldType);
+				explain.setKey(fieldType);
 				MapperNode mapperNode= mapperNodeMap.get(fieldType);
 				explain.setType(mapperNode.getHtmlPath());
 				explain.setDescription(mapperNode.getDescription());

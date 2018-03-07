@@ -24,7 +24,7 @@ public class JavaCodeGenerator extends CodeGenerator{
 	private static final String FILE_SETTER_TEMPLATE = "Java_Entity_Setter.tpl";
 	private static final String FILE_CLASS_TEMPLATE = "Java_Entity.tpl";
 	private static final String FILE_CODE_TEMPLATE = "Code_File.html.tpl";
-	private static final String JAVA_CODE_DIR = "javaCodes";
+	public static final String JAVA_CODE_DIR = "javaCodes";
 
 	private static String sFieldTemplate, sGetterTemplate, sSetterTemplate, sClassTemplate,sCodeTemplate;
 	static{

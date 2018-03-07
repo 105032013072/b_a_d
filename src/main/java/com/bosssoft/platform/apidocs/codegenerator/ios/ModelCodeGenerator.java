@@ -17,7 +17,7 @@ public class ModelCodeGenerator extends CodeGenerator{
 	private static final String FILE_FIELD_TEMPLATE = "IOS_Model_Field.tpl";
 	private static final String FILE_MODEL_TEMPLATE = "IOS_Model.tpl";
 	private static final String FILE_CODE_TEMPLATE = "Code_File.html.tpl";
-	private static final String IOS_CODE_DIR = "iosCodes";
+	public static final String IOS_CODE_DIR = "iosCodes";
 	
 	private static String sFieldTemplate;
 	private static String sModelTemplate;

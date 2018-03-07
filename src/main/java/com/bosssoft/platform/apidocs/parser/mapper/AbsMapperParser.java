@@ -113,7 +113,7 @@ public abstract class AbsMapperParser {
 		String type= implement.getTypeArguments().get(0).asString();
 		if(IsEntityExist(type)){
 			Explain explain=new Explain();
-			explain.setType(type);
+			explain.setKey(type);
 			EntityNode entityNode=entityNodeMap.get(type);
 			explain.setDescription(entityNode.getDescription());
 			explain.setType(entityNode.getHtmlPath());

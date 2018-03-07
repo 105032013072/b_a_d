@@ -14,11 +14,11 @@ import java.util.Map.Entry;
 
 import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.Docs.DocsConfig;
-import com.bosssoft.platform.apidocs.HtmlType;
 import com.bosssoft.platform.apidocs.LogUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.codegenerator.ios.ModelCodeGenerator;
 import com.bosssoft.platform.apidocs.codegenerator.java.JavaCodeGenerator;
+import com.bosssoft.platform.apidocs.enumtype.HtmlType;
 import com.bosssoft.platform.apidocs.parser.controller.AbsControllerParser;
 import com.bosssoft.platform.apidocs.parser.entity.EntityParser;
 import com.bosssoft.platform.apidocs.parser.mapper.AbsMapperParser;
@@ -52,7 +52,7 @@ public abstract class AbsDocGenerator{
     private List<EntityNode> entityHtmlList=new ArrayList<>();
     
     private List<ControllerNode> controllerNodeList = new ArrayList<>();
-    private Map<String,ServiceNode> serviceNodeMap=new HashMap<>();
+   public Map<String,ServiceNode> serviceNodeMap=new HashMap<>();
     private Map<String,MapperNode> mapperNodeMap=new HashMap<>();
     private Map<String,EntityNode> entityNodeMap=new HashMap<>();
     
@@ -95,7 +95,7 @@ public abstract class AbsDocGenerator{
         
         
         //生成word
-		WordDocBuilder wordDocBuilder = new WordDocBuilder(new ArrayList<EntityNode>(entityNodeMap.values()),DocContext.getModelMap());
+		WordDocBuilder wordDocBuilder = new WordDocBuilder(new ArrayList<EntityNode>(entityNodeMap.values()),DocContext.getModelMap(),serviceNodeMap,mapperNodeMap);
 		wordDocBuilder.buidWordDoc();
     }
 

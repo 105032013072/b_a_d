@@ -6,8 +6,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
 
-import com.bosssoft.platform.apidocs.HtmlType;
 import com.bosssoft.platform.apidocs.LogUtils;
+import com.bosssoft.platform.apidocs.enumtype.HtmlType;
 import com.bosssoft.platform.common.utils.FileUtils;
 import com.bosssoft.platform.common.utils.StringUtils;
 

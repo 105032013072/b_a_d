@@ -1,4 +1,4 @@
-package com.bosssoft.platform.apidocs;
+package com.bosssoft.platform.apidocs.enumtype;
 
 public enum HtmlType {
   CLASSCONTROLLER,

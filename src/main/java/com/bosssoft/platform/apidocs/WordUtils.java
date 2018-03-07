@@ -5,14 +5,30 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.collections.map.HashedMap;
+
+import com.bosssoft.platform.apidocs.doc.WordDocBuilder;
+import com.bosssoft.platform.apidocs.enumtype.ClassType;
+import com.bosssoft.platform.apidocs.enumtype.WordListType;
+import com.bosssoft.platform.apidocs.enumtype.WordTitleType;
 import com.bosssoft.platform.apidocs.parser.mate.AttributeNode;
+import com.bosssoft.platform.apidocs.parser.mate.EntityNode;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
+import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
+import com.bosssoft.platform.apidocs.parser.mate.Model;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
+import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.bosssoft.platform.common.utils.FileUtils;
+import com.lowagie.text.Anchor;
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;
+import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -34,6 +50,7 @@ public class WordUtils {
 	public  Document document;
 	
 	private Font titleFont;
+	private Font linkFont;
 	private Font thFont;
 	private Font tdFont;
 	private Font tableTitleFont;
@@ -43,6 +60,7 @@ public class WordUtils {
 	private RtfParagraphStyle rtfGsBt4;
 	private RtfFont contextFont;
 	private RtfParagraphStyle heading_4=new RtfParagraphStyle("heading 4","Normal");
+	
     
 	/**
 	 * 初始化word文档
@@ -114,10 +132,14 @@ public class WordUtils {
 		
 		//表头字体
 		tableTitleFont=FontFactory.getFont("楷体_gb2312", 10);
+		
+		//链接字体
+		linkFont=FontFactory.getFont(FontFactory.HELVETICA,9,Font.UNDERLINE,new Color(0,0,255));
 	}
 
 	public void renderTitle(String titleName,WordTitleType titleType) throws DocumentException{
-		Paragraph title = new Paragraph(titleName); 
+		Paragraph title = new Paragraph(); 
+		title.add(new Chunk(titleName));
 		title.setSpacingBefore(50);
 		switch (titleType){
 		case TITLE_1:
@@ -133,6 +155,7 @@ public class WordUtils {
 	    	title.setFont(rtfGsBt4);
 			break;
 		}
+
 		document.add(title);
 	
 	}
@@ -275,18 +298,96 @@ public class WordUtils {
 	}
 	
 	
-	public void renderList(List<Explain> list)throws Exception{
+	public void renderList(List<Explain> list,ClassType classType)throws Exception{
 		com.lowagie.text.List subList=new com.lowagie.text.List(false, false, 10);
 	        subList.setListSymbol("\u2022");
 	        for (Explain explain : list) {
-	        	ListItem item=new ListItem(explain.getDescription());
+	        	ListItem item=new ListItem();
+	        	Anchor link = new Anchor(explain.getDescription(),linkFont);
 	        	item.setSpacingBefore(4);
+	        	link.setReference(constructLink(explain,classType));
+	        	System.out.println(link.getReference());
+	        	item.add(link);
 	        	subList.add(item);
+	        	//linkMap.put(explain.getDescription(), link);
 	        }
 	        subList.setIndentationLeft(20);
 	        document.add(subList);
 	}
 	
+	private String constructLink( Explain explain,ClassType classType) {
+	   StringBuffer strbuffer=new StringBuffer("#");
+	   int typenum=1;
+	   int modelnum=1;
+	   int orderList=1;
+	   String typeKey=explain.getKey();
+	   switch (classType) {
+		case SERVICE:
+			typenum=2;
+			ServiceNode serviceNode=WordDocBuilder.serviceNodeMap.get(typeKey);
+			if(serviceNode!=null){
+				String modelName=serviceNode.getModelName();
+				modelnum=getModelOrder(modelName);
+				orderList=getserviceOrdernumber(WordDocBuilder.modelMap.get(modelName).getServiceNodeList(),typeKey);
+			}
+			strbuffer.append("2.").append(modelnum+".").append(typenum+".").append(orderList).append(" "+explain.getDescription());
+			break;
+		case MAPPER:
+			typenum=3;
+			MapperNode mapperNode=WordDocBuilder.mapperNodeMap.get(typeKey);
+			if(mapperNode!=null){
+				String modelName=mapperNode.getModelName();
+				modelnum=getModelOrder(modelName);
+				orderList=getMapperOrdernumber(WordDocBuilder.modelMap.get(modelName).getMapperNodeList(),typeKey);
+			}
+			strbuffer.append("2.").append(modelnum+".").append(typenum+".").append(orderList).append(" "+explain.getDescription());
+			break;
+		case ENTITY:
+			orderList=getEntityOrdernumber(typeKey);
+			strbuffer.append("1.").append(orderList).append(" "+explain.getDescription());
+		   break;
+
+		default:
+			break;
+		}
+		return strbuffer.toString();
+	}
+
+  
+
+	private int getEntityOrdernumber(String typeKey) {
+		List<EntityNode> list=WordDocBuilder.entityNodeList;
+		for(int i=0;i<list.size();i++){
+			if(typeKey.equals(list.get(i).getClassName())) return (i+1);
+		}
+		return 1;
+	}
+
+	private int getMapperOrdernumber(List<MapperNode> mapperNodeList, String typeKey) {
+		for(int i=0;i<mapperNodeList.size();i++){
+			if(typeKey.equals(mapperNodeList.get(i).getClassName())) return (i+1);
+		}
+		return 1;
+	}
+
+	private int  getserviceOrdernumber(List<ServiceNode> serviceNodeList, String typeKey) {
+		for(int i=0;i<serviceNodeList.size();i++){
+			if(typeKey.equals(serviceNodeList.get(i).getClassName())) return (i+1);
+		}
+		return 1;
+	}
+
+	private int getModelOrder(String modelName) {
+		Map<String,Model>modelMap=WordDocBuilder.modelMap;
+		Set<String> keySet=modelMap.keySet();
+		int i=1;
+		for (String key : keySet) {
+			if(key.equals(modelName)) return i;
+			i++;
+		}
+		return 1;
+	}
+
 	public void renderJsonStr(String str)throws Exception{
 		Table table=new Table(1);
 		Cell cell=new Cell();
@@ -295,4 +396,54 @@ public class WordUtils {
 		table.setOffset(1f);
 		document.add(table);
 	}
+	
+	/**
+	 * 创建mapper对应的实体
+	 * @param explain
+	 * @throws DocumentException
+	 */
+	public void renderCorrespondingEntity(Explain explain) throws DocumentException{
+		com.lowagie.text.List subList=new com.lowagie.text.List(false, false, 10);
+		subList.setListSymbol("\u2666");
+		ListItem item=new ListItem("对应实体： ");
+		
+		Anchor link = new Anchor(explain.getDescription(),linkFont);
+    	item.setSpacingBefore(4);
+    	link.setReference(constructLink(explain,ClassType.ENTITY));
+    	System.out.println(link.getReference());
+    	item.add(link);
+		
+		item.setSpacingBefore(6);
+        subList.add(item);
+        document.add(subList); 
+	}
+
+	/**
+	 * 创建controller返回结果的javacode和IOSCode
+	 * @param className
+	 * @throws Exception
+	 */
+	public void renderCode(String className)throws Exception{
+		com.lowagie.text.List subList=new com.lowagie.text.List(false, false, 10);
+		subList.setListSymbol("\u2022");
+		ListItem item=new ListItem("返回结果："+className+"  ");
+		item.setSpacingBefore(4);
+		
+		Anchor androidlink = new Anchor("Android Code",linkFont);
+    	androidlink.setReference("#3.1."+WordDocBuilder.javaCodeOrderMap.get(className));
+    	item.add(androidlink);
+		
+    	
+    	item.add(new Chunk("|"));
+    	
+    	Anchor IOSlink = new Anchor("IOS Code",linkFont);
+    	IOSlink.setReference("#3.2."+WordDocBuilder.javaCodeOrderMap.get(className));
+    	item.add(IOSlink);
+    	
+		item.setSpacingBefore(6);
+        subList.add(item);
+        document.add(subList); 
+	}
+	
+	
 }

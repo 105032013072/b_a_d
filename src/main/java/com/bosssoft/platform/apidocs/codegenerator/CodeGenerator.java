@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.Utils;
+import com.bosssoft.platform.apidocs.codegenerator.ios.ModelCodeGenerator;
+import com.bosssoft.platform.apidocs.codegenerator.java.JavaCodeGenerator;
+import com.bosssoft.platform.apidocs.doc.WordDocBuilder;
 import com.bosssoft.platform.apidocs.parser.mate.FieldNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 
@@ -39,6 +42,16 @@ public abstract class CodeGenerator {
 		String javaFileName = responseNode.getClassName() + ".html";
 		Utils.writeToDisk(new File(codePath, javaFileName), codeBuilder.build());
 		String relateUrl = codeRelativePath + '/' + javaFileName;
+		
+		String mapkey=responseNode.getClassName();
+	   if(codeRelativePath.contains(JavaCodeGenerator.JAVA_CODE_DIR)){
+		   WordDocBuilder.addJavaCode(mapkey, codeBodyBuilder.toString());
+		   WordDocBuilder.addJavaCodeOrder(mapkey, (WordDocBuilder.javaCodeOrder++));
+	   }else if(codeRelativePath.contains(ModelCodeGenerator.IOS_CODE_DIR)){
+		   WordDocBuilder.addIOSCode(mapkey, codeBodyBuilder.toString());
+		   WordDocBuilder.addIOSCodeOrder(mapkey, (WordDocBuilder.iosCodeOrder++));
+	   }
+	   
 		return relateUrl;
 	}
 	
