@@ -41,6 +41,11 @@ public abstract  class AbsServiceParser {
     	this.compilationUnit= ParseUtils.compilationUnit(javaFile);
     	this.serviceNode=new ServiceNode();
         
+    	//service所属模块
+    	 String modelName=ParseUtils.getClassModel(compilationUnit);
+    	 serviceNode.setModelName(modelName);
+    	
+    	
     	String serviceName=Utils.getJavaFileName(javaFile);
     	ClassOrInterfaceDeclaration declaration=compilationUnit.getClassByName(serviceName);
     	

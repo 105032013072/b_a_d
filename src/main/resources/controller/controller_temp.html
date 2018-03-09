@@ -20,7 +20,7 @@
 <h2 id="调用service">调用service</h2>
 
 	<#list autowiredServiceList as autowiredService>
- <p">	<a href="${autowiredService.type}">» ${autowiredService.description}</a></p>
+ <p">	<a href="${autowiredService.type}">» ${autowiredService.description}&nbsp(${autowiredService.key})</a></p>
 	</#list>
 
 <hr>

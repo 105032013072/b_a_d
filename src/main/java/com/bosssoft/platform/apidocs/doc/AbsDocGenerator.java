@@ -247,9 +247,6 @@ public abstract class AbsDocGenerator{
 				MapperNode mNode=mapperParser.parse(mapperFile,entityNodeMap);
 				mapperNodeMap.put(mNode.getClassName(),mNode);
 				
-				//设置所属模块
-				mNode.setModelName("登录模块");
-				
 				LogUtils.info("start to generate docs for mapper file : %s", mapperFile.getName());
 				 String htmlPath=DocContext.getDocPath()+File.separator+mNode.getModelName()+File.separator+"mapper"+File.separator+mNode.getClassName()+".html";
 				 HtmlDocBuilder.buildHtml(mNode, htmlPath, HtmlType.CLASSMAPPER);
@@ -270,9 +267,6 @@ public abstract class AbsDocGenerator{
 				 LogUtils.info("start to parse service file : %s", serviceFile.getName());
 				 ServiceNode sNode=serviceParser.parse(serviceFile,mapperNodeMap);
 				 serviceNodeMap.put(sNode.getClassName(),sNode);
-				 
-				//设置所属模块
-				 sNode.setModelName("登录模块");
 				 
 				 LogUtils.info("start to generate docs for service file : %s", serviceFile.getName());
 				 String htmlPath=DocContext.getDocPath()+File.separator+sNode.getModelName()+File.separator+"service"+File.separator+sNode.getClassName()+".html";
@@ -298,7 +292,6 @@ public abstract class AbsDocGenerator{
                 }
                 controllerNodeList.add(controllerNode);
                 LogUtils.info("start to generate docs for controller file : %s", controllerFile.getName());
-                controllerNode.setModelName("登录模块");
                /* String controllerDocs = controllerDocBuilder.buildDoc(controllerNode);
                 String docName = controllerNode.getDescription();
                 docFileNameList.add(docName);

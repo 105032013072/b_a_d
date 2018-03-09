@@ -10,15 +10,17 @@ import java.lang.annotation.Target;
 public @interface ApiDoc {
 
     /**
-     * result class
+     * result class for single
      * @return
      */
-	Class<?> value() default Null.class;
+	Class<?> result() default Null.class;
 
     /**
-     * result class
+     * result class for map
      */
-	Class<?> result() default Null.class;
+	Class<?>[] value() default {};
+	
+	String[] key() default {};
 
     /**
      * request url

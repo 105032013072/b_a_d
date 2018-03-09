@@ -16,9 +16,11 @@ import com.bosssoft.platform.apidocs.parser.mate.Model;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.apidocs.parser.service.AbsServiceParser;
 import com.bosssoft.platform.apidocs.parser.service.SpringServiceParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -48,6 +50,7 @@ public class DocContext {
 	private static List<File> mapperFile;
 	private static List<File> entityFiles;
 	private static Map<String,Model> modelMap;
+	private static Map<String,String> modelPackageMap;
 	
 	private static IResponseWrapper responseWrapper;
 	private static Docs.DocsConfig config;
@@ -142,10 +145,34 @@ public class DocContext {
 	}
 
 	private static void loadProjectModel(File javaSrcDir) {
-	    modelMap=new LinkedHashMap<>();
-	    Model model=new Model();
-	    model.setModelName("登录模块");
-	    modelMap.put(model.getModelName(), model);
+		List<File> result=new ArrayList<>();
+		modelMap=new LinkedHashMap<>();
+		modelPackageMap=new HashMap<>();
+		
+		Utils.wideSearchFile(javaSrcDir, new FilenameFilter() {
+			@Override
+			public boolean accept(File f, String name) {
+                if(f.getName().equals("package-info.java")){
+                	System.out.println(f.getName());
+                	CompilationUnit compilationUnit=ParseUtils.compilationUnit(f);
+                	Comment comment=compilationUnit.getPackageDeclaration().getComment();
+                	String [] docArray=comment.toString().split("\r\n");
+                	for (String doc : docArray) {
+						if(doc.contains("模块名称")){
+							String modelName=doc.split("=")[1].trim();
+							String packageName=compilationUnit.getPackageDeclaration().getNameAsString();
+							modelPackageMap.put(packageName, modelName);
+							Model model=new Model();
+						    model.setModelName(modelName);
+						    modelMap.put(model.getModelName(), model);
+						}
+					}
+                }
+       
+				return false;
+				
+			}
+		}, result, false);
 	}
 
 	private static void loadEntityFile(File javaSrcDir) {
@@ -447,6 +474,14 @@ public class DocContext {
 
 	public static Map<String, Model> getModelMap() {
 		return modelMap;
+	}
+	
+	public static Set<String> getModelPackageMapKeySet(){
+		return modelPackageMap.keySet();
+	}
+
+	public static Map<String, String> getModelPackageMap() {
+		return modelPackageMap;
 	}
 	
 	

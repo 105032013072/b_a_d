@@ -720,5 +720,19 @@ public class ParseUtils {
 	  return doc;
   }  
   
+  /**
+   * 获取类所属的模块名
+   * @param packageName
+   * @return
+   */
+  public static String getClassModel(CompilationUnit compilationUnit){
+	  String packageName=compilationUnit.getPackageDeclaration().getNameAsString();
+	  Set<String> packageSet=DocContext.getModelPackageMapKeySet();
+	  for (String name : packageSet) {
+		if(packageName.startsWith(name)) return DocContext.getModelPackageMap().get(name);
+	}
+	  return "";
+  } 
+  
   
 }

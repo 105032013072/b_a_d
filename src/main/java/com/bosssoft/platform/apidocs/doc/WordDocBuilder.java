@@ -65,7 +65,7 @@ public class WordDocBuilder {
 			wordUtils.renderTitle("1.数据实体", WordTitleType.TITLE_1);
 			int number=1;
 			for (EntityNode entityNode : entityNodeList) {
-				wordUtils.renderTitle("1."+(number++)+"  "+entityNode.getClassName(), WordTitleType.TITLE_2);
+				wordUtils.renderTitle("1."+(number++)+"  "+entityNode.getDescription(), WordTitleType.TITLE_2);
 				wordUtils.renderContent("1) 实体名: "+entityNode.getClassName());
 				wordUtils.renderContent("2) 对应表: "+entityNode.getTableName());
 				wordUtils.renderContent("3) 属性列表： ");
@@ -139,6 +139,7 @@ public class WordDocBuilder {
 		int number=1;
 		for (MapperNode mapperNode : mapperNodeList) {
 			wordUtils.renderTitle(titleStr+"."+(number++)+"  "+mapperNode.getDescription(), WordTitleType.TITLE_4);
+			wordUtils.renderClassName(mapperNode.getClassName());
 			//对应实体
 			/*wordUtils.renderListTitle("对应实体",WordListType.DIAMOND);*/
 			wordUtils.renderCorrespondingEntity(mapperNode.getRelationEntity());
@@ -158,6 +159,8 @@ public class WordDocBuilder {
 		int number=1;
 		for (ServiceNode serviceNode : serviceNodeList) {
 			wordUtils.renderTitle(titleStr+"."+(number++)+"  "+serviceNode.getDescription(), WordTitleType.TITLE_4);
+			wordUtils.renderClassName(serviceNode.getClassName());
+			
 			//数据访问接口调用
 			wordUtils.renderListTitle("数据访问接口调用",WordListType.DIAMOND);
 			wordUtils.renderList(serviceNode.getAutowiredMapperList(),ClassType.MAPPER);
@@ -208,6 +211,8 @@ public class WordDocBuilder {
 		int number=1;
 		for (ControllerNode controllerNode : controllerNodeList) {
 			wordUtils.renderTitle(titleStr+"."+(number++)+"  "+controllerNode.getDescription(), WordTitleType.TITLE_4);
+			wordUtils.renderClassName(controllerNode.getClassName());
+			
 			//服务接口调用
 			wordUtils.renderListTitle("服务接口调用",WordListType.DIAMOND);
 			wordUtils.renderList(controllerNode.getAutowiredServiceList(),ClassType.SERVICE);

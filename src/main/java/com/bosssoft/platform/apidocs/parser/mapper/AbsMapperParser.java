@@ -37,6 +37,10 @@ public abstract class AbsMapperParser {
     	this.javaFile=javaFile;
     	this.compilationUnit= ParseUtils.compilationUnit(javaFile);
     	
+    	//mapper所属模块
+    	 String modelName=ParseUtils.getClassModel(compilationUnit);
+    	 mapperNode.setModelName(modelName);
+    	
     	 String mapperName = Utils.getJavaFileName(javaFile);
     	 ClassOrInterfaceDeclaration declaration =compilationUnit.getInterfaceByName(mapperName);
     	if(declaration!=null){

@@ -58,10 +58,15 @@ public abstract class AbsControllerParser {
                     parseMethodDocs(c);
                     afterHandleController(controllerNode, c);
                 }); */ 
+        
+        //contorlelr所属的模块
+        String modelName=ParseUtils.getClassModel(compilationUnit);
+        controllerNode.setModelName(modelName);
+        
         ClassOrInterfaceDeclaration declaration =compilationUnit.getClassByName(controllerName);
         if(declaration!=null){
         	 parseClassDoc(declaration);
-     		parseAutowireService(declaration);//解析调用的service
+     		 parseAutowireService(declaration);//解析调用的service
              parseMethodDocs(declaration);
              afterHandleController(controllerNode, declaration);
         }

@@ -303,10 +303,10 @@ public class WordUtils {
 	        subList.setListSymbol("\u2022");
 	        for (Explain explain : list) {
 	        	ListItem item=new ListItem();
-	        	Anchor link = new Anchor(explain.getDescription(),linkFont);
+	        	String context=explain.getDescription()+" ("+explain.getKey()+")";
+	        	Anchor link = new Anchor(context,linkFont);
 	        	item.setSpacingBefore(4);
 	        	link.setReference(constructLink(explain,classType));
-	        	System.out.println(link.getReference());
 	        	item.add(link);
 	        	subList.add(item);
 	        	//linkMap.put(explain.getDescription(), link);
@@ -407,12 +407,20 @@ public class WordUtils {
 		subList.setListSymbol("\u2666");
 		ListItem item=new ListItem("对应实体： ");
 		
-		Anchor link = new Anchor(explain.getDescription(),linkFont);
+		Anchor link = new Anchor(explain.getDescription()+" ("+explain.getKey()+")",linkFont);
     	item.setSpacingBefore(4);
     	link.setReference(constructLink(explain,ClassType.ENTITY));
-    	System.out.println(link.getReference());
     	item.add(link);
 		
+		item.setSpacingBefore(6);
+        subList.add(item);
+        document.add(subList); 
+	}
+	
+	public void renderClassName(String className)throws DocumentException{
+		com.lowagie.text.List subList=new com.lowagie.text.List(false, false, 10);
+		subList.setListSymbol("\u2666");
+		ListItem item=new ListItem("类名： "+className);		
 		item.setSpacingBefore(6);
         subList.add(item);
         document.add(subList); 
