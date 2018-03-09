@@ -18,6 +18,7 @@ public class RequestNode {
     private String url;
     private String description;
     private String methodName;
+    private String returnString;
     private List<ParamNode> paramNodes = new ArrayList<>();
     private List<HeaderNode> header = new ArrayList<>();
     private Boolean deprecated = Boolean.FALSE;
@@ -136,6 +137,14 @@ public class RequestNode {
 
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
+	}
+
+	public String getReturnString() {
+		return returnString;
+	}
+
+	public void setReturnString(String returnString) {
+		this.returnString = returnString;
 	}
     
     

@@ -19,9 +19,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
@@ -41,7 +39,7 @@ import java.util.Optional;
  *
  * @author yeguozhong yedaxia.github.com
  */
-public abstract class AbsControllerParser {
+public abstract class AbsControllerParserNew {
 
     private CompilationUnit compilationUnit;
     private ControllerNode controllerNode;
@@ -137,6 +135,8 @@ public abstract class AbsControllerParser {
         controllerNode.setClassName(c.getNameAsString());
 
     }
+
+    //解析方法的注释
     private void parseMethodDocs(ClassOrInterfaceDeclaration c){
         /*c.getChildNodesByType(MethodDeclaration.class).stream()
                 .filter(m -> m.getModifiers().contains(Modifier.PUBLIC) && m.getOptionalAnnotationByName("ApiDoc").isPresent())
@@ -273,174 +273,21 @@ public abstract class AbsControllerParser {
 		}
     	
     }
-    
-    
-    
-
-    //解析方法的注释
-    /*private void parseMethodDocs(ClassOrInterfaceDeclaration c){
-        c.getChildNodesByType(MethodDeclaration.class).stream()
-                .filter(m -> m.getModifiers().contains(Modifier.PUBLIC) && m.getOptionalAnnotationByName("ApiDoc").isPresent())
-                .forEach(m -> {
-                    m.getOptionalAnnotationByName("ApiDoc").ifPresent(an -> {
-                        RequestNode requestNode = new RequestNode();
-                        m.getAnnotationByClass(Deprecated.class).ifPresent(f -> {requestNode.setDeprecated(true);});
-                       
-                        //参数的注释
-                        m.getJavadoc().ifPresent( d -> {
-                            String description = d.getDescription().toText();
-                            requestNode.setDescription(description);
-                            d.getBlockTags().stream()
-                                    .filter(t -> t.getTagName().equals("param"))
-                                    .forEach(t ->{
-                                        ParamNode paramNode = new ParamNode();
-                                        paramNode.setName(t.getName().get());
-                                        paramNode.setDescription(t.getContent().toText());
-                                        requestNode.addParamNode(paramNode);
-                                    });
-                        });
-
-                        //参数名以及类型
-                        m.getParameters().forEach(p -> {
-                            String paraName  = p.getName().asString();
-                            ParamNode paramNode = requestNode.getParamNodeByName(paraName);
-                            if(paramNode != null){
-                                paramNode.setType(ParseUtils.unifyType(p.getType().asString()));
-                            }
-                        });
-
-                        afterHandleMethod(requestNode, m);
-
-                        com.github.javaparser.ast.type.Type resultClassType = null;
-                        if(an instanceof SingleMemberAnnotationExpr){
-                            resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
-                        }else if(an instanceof NormalAnnotationExpr){
-                            Optional<MemberValuePair> opPair = ((NormalAnnotationExpr)an)
-                                    .getPairs().stream()
-                                    .filter(rs -> rs.getNameAsString().equals("result"))
-                                    .findFirst();
-                            if(opPair.isPresent()){
-                                resultClassType = ((ClassExpr) opPair.get().getValue()).getType();
-                            }
-                        }
-
-                        if(resultClassType == null){
-                            return;
-                        }
-
-                        ResponseNode responseNode = new ResponseNode();
-                        File resultJavaFile;
-                        if(resultClassType.asString().endsWith("[]")){
-                            responseNode.setList(Boolean.TRUE);
-                            String type = resultClassType.getElementType().asString();
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
-                        }else{
-                            responseNode.setList(Boolean.FALSE);
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, resultClassType.asString());
-                        }
-                        responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
-                        ParseUtils.parseResponseNode(resultJavaFile, responseNode);
-                        requestNode.setResponseNode(responseNode);
-
-                        controllerNode.addRequestNode(requestNode);
-                    });
-                });
-    	//jdk1.7
-    	List<MethodDeclaration> MethodDeclarationList=getMethodDeclaration(c);
-    	for (MethodDeclaration m : MethodDeclarationList) {
-			if(m.getAnnotationByName("ApiDoc")!=null){
-				AnnotationExpr an=m.getAnnotationByName("ApiDoc");
-				RequestNode requestNode = new RequestNode();
-				requestNode.setMethodName(ParseUtils.parserMethodName(m));
-                if( m.getAnnotationByClass(Deprecated.class)!=null) requestNode.setDeprecated(true);
-                
-                //方法上的注释（说明以及param）
-                Javadoc javadoc=m.getJavadoc();
-                if(javadoc!=null){
-                	String description = javadoc.getDescription().toText();
-                    requestNode.setDescription(description);
-                    List<JavadocBlockTag> tagList=javadoc.getBlockTags();
-                    for (JavadocBlockTag javadocBlockTag : tagList) {
-						if(javadocBlockTag.getTagName().equals("param")){
-							ParamNode paramNode = new ParamNode();
-                            paramNode.setName(javadocBlockTag.getName());
-                            paramNode.setDescription(javadocBlockTag.getContent().toText());
-                            requestNode.addParamNode(paramNode);
-						}
-					}
-
-                }
-                
-                //参数名以及类型
-                NodeList<Parameter> paramList= m.getParameters();
-                for (Parameter p : paramList) {
-					String paraName=p.getName().asString();
-					ParamNode paramNode = requestNode.getParamNodeByName(paraName);
-                    if(paramNode != null){
-                        paramNode.setType(ParseUtils.unifyType(p.getType().asString()));
-                    }
-				}
-                afterHandleMethod(requestNode, m);
-                com.github.javaparser.ast.type.Type resultClassType = null;
-                if(an instanceof SingleMemberAnnotationExpr){
-                	 resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
-                }else if(an instanceof NormalAnnotationExpr){
-                	MemberValuePair pair=null;
-                	NodeList<MemberValuePair> memberValueList =((NormalAnnotationExpr)an).getPairs();
-                	for (MemberValuePair memberValuePair : memberValueList) {
-						if(memberValuePair.getNameAsString().equals("result")) pair=memberValuePair;
-					}
-                	if(pair!=null) resultClassType = ((ClassExpr) pair.getValue()).getType();
-                	
-                }
-                
-                
-                
-                if(resultClassType == null){
-                    return;
-                }
-
-                ResponseNode responseNode = new ResponseNode();
-                File resultJavaFile;
-                
-                if(resultClassType.asString().endsWith("[]")){
-                	responseNode.setList(Boolean.TRUE);
-                    String type = resultClassType.getElementType().asString();
-                    resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
-                }else{
-                	responseNode.setList(Boolean.FALSE);
-                    resultJavaFile = ParseUtils.searchJavaFile(javaFile, resultClassType.asString());
-                }
-                responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
-                ParseUtils.parseResponseNode(resultJavaFile, responseNode);
-                requestNode.setResponseNode(responseNode);
-
-                if(StringUtils.isNullOrBlank(requestNode.getDescription())){
-                	requestNode.setDescription(requestNode.getMethodName());
-                }
-                controllerNode.addRequestNode(requestNode);
-			}
-		}
-    	
-    }*/
 
     private void parserApiDoc(AnnotationExpr an, RequestNode requestNode) {
     	com.github.javaparser.ast.type.Type resultClassType = null;
     	if(an instanceof SingleMemberAnnotationExpr){
        	    resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
     	}else if(an instanceof NormalAnnotationExpr){
-    		NodeList<Expression> keyList=new NodeList<>();
-    		NodeList<Expression> valueList=new NodeList<>();
+    		String[] keyArray=null;
     		
     		NodeList<MemberValuePair> memberValueList =((NormalAnnotationExpr)an).getPairs();
         	for (MemberValuePair memberValuePair : memberValueList) {
 				if("key".equals(memberValuePair.getNameAsString())){
-					keyList=((ArrayInitializerExpr)memberValuePair.getValue()).getValues();
+				   System.out.println(memberValuePair);
 				}else if("value".equals(memberValuePair.getNameAsString())){
-					valueList=((ArrayInitializerExpr)memberValuePair.getValue()).getValues();
+					
 				}
-				
-				
 			}
     	}
 		

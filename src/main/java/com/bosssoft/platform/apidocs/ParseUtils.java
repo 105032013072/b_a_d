@@ -591,7 +591,7 @@ public class ParseUtils {
 	  return returnNode;
   }
   
-  private static String getBasicType(Type type) {
+  public static String getBasicType(Type type) {
 	  
   	String typeStr=type.asString();
   	if(ParseUtils.TYPE_MODEL.equals(typeStr)||"Void".equalsIgnoreCase(typeStr)){
