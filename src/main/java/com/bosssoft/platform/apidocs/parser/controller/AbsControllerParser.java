@@ -5,6 +5,7 @@ import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.mate.ControllerNode;
 import com.bosssoft.platform.apidocs.parser.mate.Explain;
+import com.bosssoft.platform.apidocs.parser.mate.FieldNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
@@ -25,6 +26,8 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
@@ -138,76 +141,11 @@ public abstract class AbsControllerParser {
 
     }
     private void parseMethodDocs(ClassOrInterfaceDeclaration c){
-        /*c.getChildNodesByType(MethodDeclaration.class).stream()
-                .filter(m -> m.getModifiers().contains(Modifier.PUBLIC) && m.getOptionalAnnotationByName("ApiDoc").isPresent())
-                .forEach(m -> {
-                    m.getOptionalAnnotationByName("ApiDoc").ifPresent(an -> {
-                        RequestNode requestNode = new RequestNode();
-                        m.getAnnotationByClass(Deprecated.class).ifPresent(f -> {requestNode.setDeprecated(true);});
-                       
-                        //参数的注释
-                        m.getJavadoc().ifPresent( d -> {
-                            String description = d.getDescription().toText();
-                            requestNode.setDescription(description);
-                            d.getBlockTags().stream()
-                                    .filter(t -> t.getTagName().equals("param"))
-                                    .forEach(t ->{
-                                        ParamNode paramNode = new ParamNode();
-                                        paramNode.setName(t.getName().get());
-                                        paramNode.setDescription(t.getContent().toText());
-                                        requestNode.addParamNode(paramNode);
-                                    });
-                        });
-
-                        //参数名以及类型
-                        m.getParameters().forEach(p -> {
-                            String paraName  = p.getName().asString();
-                            ParamNode paramNode = requestNode.getParamNodeByName(paraName);
-                            if(paramNode != null){
-                                paramNode.setType(ParseUtils.unifyType(p.getType().asString()));
-                            }
-                        });
-
-                        afterHandleMethod(requestNode, m);
-
-                        com.github.javaparser.ast.type.Type resultClassType = null;
-                        if(an instanceof SingleMemberAnnotationExpr){
-                            resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
-                        }else if(an instanceof NormalAnnotationExpr){
-                            Optional<MemberValuePair> opPair = ((NormalAnnotationExpr)an)
-                                    .getPairs().stream()
-                                    .filter(rs -> rs.getNameAsString().equals("result"))
-                                    .findFirst();
-                            if(opPair.isPresent()){
-                                resultClassType = ((ClassExpr) opPair.get().getValue()).getType();
-                            }
-                        }
-
-                        if(resultClassType == null){
-                            return;
-                        }
-
-                        ResponseNode responseNode = new ResponseNode();
-                        File resultJavaFile;
-                        if(resultClassType.asString().endsWith("[]")){
-                            responseNode.setList(Boolean.TRUE);
-                            String type = resultClassType.getElementType().asString();
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
-                        }else{
-                            responseNode.setList(Boolean.FALSE);
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, resultClassType.asString());
-                        }
-                        responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
-                        ParseUtils.parseResponseNode(resultJavaFile, responseNode);
-                        requestNode.setResponseNode(responseNode);
-
-                        controllerNode.addRequestNode(requestNode);
-                    });
-                });*/
+   
     	//jdk1.7
     	List<MethodDeclaration> MethodDeclarationList=getMethodDeclaration(c);
     	for (MethodDeclaration m : MethodDeclarationList) {
-			if(m.getAnnotationByName("RequestMapping")!=null){
+			if(m.getAnnotationByName("RequestMapping")!=null||m.getAnnotationByName("GetMapping")!=null||m.getAnnotationByName("PostMapping")!=null){
 				RequestNode requestNode = new RequestNode();
 				requestNode.setMethodName(ParseUtils.parserMethodName(m));
                 if( m.getAnnotationByClass(Deprecated.class)!=null) requestNode.setDeprecated(true);
@@ -278,73 +216,8 @@ public abstract class AbsControllerParser {
     
 
     //解析方法的注释
-    /*private void parseMethodDocs(ClassOrInterfaceDeclaration c){
-        c.getChildNodesByType(MethodDeclaration.class).stream()
-                .filter(m -> m.getModifiers().contains(Modifier.PUBLIC) && m.getOptionalAnnotationByName("ApiDoc").isPresent())
-                .forEach(m -> {
-                    m.getOptionalAnnotationByName("ApiDoc").ifPresent(an -> {
-                        RequestNode requestNode = new RequestNode();
-                        m.getAnnotationByClass(Deprecated.class).ifPresent(f -> {requestNode.setDeprecated(true);});
-                       
-                        //参数的注释
-                        m.getJavadoc().ifPresent( d -> {
-                            String description = d.getDescription().toText();
-                            requestNode.setDescription(description);
-                            d.getBlockTags().stream()
-                                    .filter(t -> t.getTagName().equals("param"))
-                                    .forEach(t ->{
-                                        ParamNode paramNode = new ParamNode();
-                                        paramNode.setName(t.getName().get());
-                                        paramNode.setDescription(t.getContent().toText());
-                                        requestNode.addParamNode(paramNode);
-                                    });
-                        });
-
-                        //参数名以及类型
-                        m.getParameters().forEach(p -> {
-                            String paraName  = p.getName().asString();
-                            ParamNode paramNode = requestNode.getParamNodeByName(paraName);
-                            if(paramNode != null){
-                                paramNode.setType(ParseUtils.unifyType(p.getType().asString()));
-                            }
-                        });
-
-                        afterHandleMethod(requestNode, m);
-
-                        com.github.javaparser.ast.type.Type resultClassType = null;
-                        if(an instanceof SingleMemberAnnotationExpr){
-                            resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
-                        }else if(an instanceof NormalAnnotationExpr){
-                            Optional<MemberValuePair> opPair = ((NormalAnnotationExpr)an)
-                                    .getPairs().stream()
-                                    .filter(rs -> rs.getNameAsString().equals("result"))
-                                    .findFirst();
-                            if(opPair.isPresent()){
-                                resultClassType = ((ClassExpr) opPair.get().getValue()).getType();
-                            }
-                        }
-
-                        if(resultClassType == null){
-                            return;
-                        }
-
-                        ResponseNode responseNode = new ResponseNode();
-                        File resultJavaFile;
-                        if(resultClassType.asString().endsWith("[]")){
-                            responseNode.setList(Boolean.TRUE);
-                            String type = resultClassType.getElementType().asString();
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
-                        }else{
-                            responseNode.setList(Boolean.FALSE);
-                            resultJavaFile = ParseUtils.searchJavaFile(javaFile, resultClassType.asString());
-                        }
-                        responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
-                        ParseUtils.parseResponseNode(resultJavaFile, responseNode);
-                        requestNode.setResponseNode(responseNode);
-
-                        controllerNode.addRequestNode(requestNode);
-                    });
-                });
+   /* private void parseMethodDocs(ClassOrInterfaceDeclaration c){
+       
     	//jdk1.7
     	List<MethodDeclaration> MethodDeclarationList=getMethodDeclaration(c);
     	for (MethodDeclaration m : MethodDeclarationList) {
@@ -428,6 +301,10 @@ public abstract class AbsControllerParser {
     	com.github.javaparser.ast.type.Type resultClassType = null;
     	if(an instanceof SingleMemberAnnotationExpr){
        	    resultClassType = ((ClassExpr) ((SingleMemberAnnotationExpr) an).getMemberValue()).getType();
+       	    ResponseNode responseNode = new ResponseNode();
+       	 responseNode= buildResponseNode(resultClassType);
+       	requestNode.setResponseNode(responseNode);
+       	    
     	}else if(an instanceof NormalAnnotationExpr){
     		NodeList<Expression> keyList=new NodeList<>();
     		NodeList<Expression> valueList=new NodeList<>();
@@ -439,13 +316,69 @@ public abstract class AbsControllerParser {
 				}else if("value".equals(memberValuePair.getNameAsString())){
 					valueList=((ArrayInitializerExpr)memberValuePair.getValue()).getValues();
 				}
-				
-				
 			}
+        	
+        	 ResponseNode resultresponseNode = new ResponseNode();
+        	 resultresponseNode.setClassName(requestNode.getMethodName()+"ReturnVo");
+        	 resultresponseNode.setList(Boolean.FALSE);
+        	for(int i=0;i<valueList.size();i++){
+        		resultClassType=((ClassExpr)valueList.get(i)).getType();
+        		 ResponseNode responseNode= buildResponseNode(resultClassType);
+        		 FieldNode fieldNdoe=new FieldNode();
+        		
+        		 fieldNdoe.setName(((StringLiteralExpr)keyList.get(i)).getValue());
+        		 fieldNdoe.setType(responseNode.getClassName());
+        		 
+        		 if(responseNode.getChildNodes().size()>0){
+               		fieldNdoe.setChildResponseNode(responseNode);
+        		 } 
+        		 resultresponseNode.addChildNode(fieldNdoe);
+        	}
+        	requestNode.setResponseNode(resultresponseNode);       	
     	}
 		
 	}
+    
+    
+    
 
+	private ResponseNode buildResponseNode(Type resultClassType) {
+		ResponseNode responseNode = new ResponseNode();
+		File resultJavaFile;
+		/*if(resultClassType.asString().endsWith("[]")){
+        	responseNode.setList(Boolean.TRUE);
+            String type = resultClassType.getElementType().asString();
+            resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
+        }else{
+        	responseNode.setList(Boolean.FALSE);
+            resultJavaFile = ParseUtils.searchJavaFile(javaFile, resultClassType.asString());
+        }
+        responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
+        ParseUtils.parseResponseNode(resultJavaFile, responseNode);*/
+        
+		String type="";
+        if(resultClassType.asString().endsWith("[]")){
+        	responseNode.setList(Boolean.TRUE);
+        	type=resultClassType.getElementType().asString();
+        }else{
+        	responseNode.setList(Boolean.FALSE);
+        	type=resultClassType.asString();
+        }
+        if(ParseUtils.TYPE_MODEL.equals(ParseUtils.unifyType(type))){
+        	 resultJavaFile = ParseUtils.searchJavaFile(javaFile, type);
+        	 responseNode.setClassName(Utils.getJavaFileName(resultJavaFile));
+             ParseUtils.parseResponseNode(resultJavaFile, responseNode);
+        }else{//基本数据类型
+        	responseNode.setClassName(type);
+        }
+
+        if(responseNode.isList()){
+        	responseNode.setClassName(responseNode.getClassName()+"[]");
+        }
+        return responseNode;
+	}
+
+	
 	private List<MethodDeclaration> getMethodDeclaration(ClassOrInterfaceDeclaration c) {
     	List<MethodDeclaration> result=new ArrayList<>();
 		List<MethodDeclaration> list=c.getChildNodesByType(MethodDeclaration.class);
