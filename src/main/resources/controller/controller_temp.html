@@ -47,9 +47,10 @@
    <#list requestNode.paramNodes as paramNode>
    <tr>
          <td >${paramNode.name}</td>
-         <td >${paramNode.type}</td>
+         <td >${paramNode.type?default("")?html}</td>
          <td ><#if paramNode.required> true <#else>false</#if></td>
-         <td >${paramNode.description}</td>
+         <td >${paramNode.description?default("")}</td>
+
    </tr>
    </#list>
   </table>
@@ -57,11 +58,26 @@
   <p><strong>参数列表:</strong> 无</p>
   </#if>
   
+  <#if ((requestNode.paramNodes)?size>0)>
+     <#list requestNode.paramNodes as paramNode>
+      <#if paramNode.needjson>
+       <pre class="prettyprint lang-json">${paramNode.jsonBody}</pre>
+      </#if>
+     </#list>
+  </#if>
   
-  <p>返回结果: <a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
-  <pre class="prettyprint lang-json">
-   ${requestNode.responseJson}
-  </pre>
+  
+  <#if requestNode.responseJson??>
+    <p>返回结果: ${requestNode.returnString?default("")?html}<a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
+    <pre class="prettyprint lang-json">
+      ${requestNode.responseJson}
+    </pre>
+  <#else> 
+    <p>返回结果: ${requestNode.returnString}</p>
+  </#if>
+  
+  
+  
   <hr>
   </#list>
 

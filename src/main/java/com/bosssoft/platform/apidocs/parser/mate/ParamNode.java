@@ -9,8 +9,9 @@ public class ParamNode {
 	public String type;
 	public boolean required;
 	public String description;
-	public boolean jsonBody;// when true ,the json body set to description
-
+	public boolean needjson=false;// when true ,the json body set to description
+    public String jsonBody;
+	
 	public String getName() {
 		return name;
 	}
@@ -43,11 +44,23 @@ public class ParamNode {
 		this.description = description;
 	}
 
-	public boolean isJsonBody() {
+
+	
+	public boolean isNeedjson() {
+		return needjson;
+	}
+
+	public void setNeedjson(boolean needjson) {
+		this.needjson = needjson;
+	}
+
+	public String getJsonBody() {
 		return jsonBody;
 	}
 
-	public void setJsonBody(boolean jsonBody) {
+	public void setJsonBody(String jsonBody) {
 		this.jsonBody = jsonBody;
 	}
+	
+	
 }

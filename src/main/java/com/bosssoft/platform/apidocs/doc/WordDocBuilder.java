@@ -22,6 +22,7 @@ import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.InterfaceNode;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.Model;
+import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ReturnNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
@@ -226,12 +227,35 @@ public class WordDocBuilder {
 				wordUtils.renderListTitle("url: "+requestNode.getUrl(), WordListType.SPOTS);
 				wordUtils.renderListTitle("参数列表: ", WordListType.SPOTS);
 				wordUtils.renderParamTableHashRequired(requestNode.getParamNodes());
+				
+				List<ParamNode> params= requestNode.getParamNodes();
+				if(isParamNeedJson(params)){
+					wordUtils.renderListTitle("参数JSON化: ", WordListType.SPOTS);
+					for (ParamNode paramNode : params) {
+						wordUtils.renderJsonStr(paramNode.getJsonBody());
+					}
+				}
+				
+				
+				
 				//wordUtils.renderListTitle("返回结果: ", WordListType.SPOTS);
 				//wordUtils.renderContent(requestNode.getResponseJson());
-				wordUtils.renderCode(requestNode.getResponseNode().getClassName());
-				wordUtils.renderJsonStr(requestNode.getResponseJson());
+				wordUtils.renderCode(requestNode);
+				
+				if(StringUtils.isNotNullAndBlank(requestNode.getResponseJson())){
+					wordUtils.renderJsonStr(requestNode.getResponseJson());
+				}
+				   
 			}
 		}
+	}
+
+	private boolean isParamNeedJson(List<ParamNode> params) {
+		Boolean result=false;
+		for (ParamNode paramNode : params) {
+			result=result||paramNode.isNeedjson();
+		}
+		return result;
 	}
 
 	public static Map<String, String> getJavaCodeMap() {

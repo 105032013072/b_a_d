@@ -57,7 +57,7 @@ public class HtmlControllerDocBuilder implements IControllerDocBuilder{
                 String paramHtmlBody = "";
 
                 for (ParamNode paramNode : requestNode.getParamNodes()) {
-                    if(paramNode.isJsonBody()){
+                    if(paramNode.isNeedjson()){
                         paramHtmlBody = buildParamJsonCode(paramNode);
                         isJsonBody = true;
                         break;

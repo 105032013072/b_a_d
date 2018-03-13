@@ -4,17 +4,25 @@ import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.mate.ClassNode;
 import com.bosssoft.platform.apidocs.parser.mate.ControllerNode;
+import com.bosssoft.platform.apidocs.parser.mate.FieldNode;
 import com.bosssoft.platform.apidocs.parser.mate.HeaderNode;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
 import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
+import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.JavadocBlockTag;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * use for spring mvc
@@ -131,7 +139,6 @@ public class SpringControllerParser extends AbsControllerParser {
         //解析参数的注解
     	parserParameterAnnotations(requestNode,md);
     	
-    	
         /*md.getParameters().forEach(p -> {
             String paraName = p.getName().asString();
             ParamNode paramNode = requestNode.getParamNodeByName(paraName);
@@ -172,6 +179,7 @@ public class SpringControllerParser extends AbsControllerParser {
     	for (Parameter p : parameterList) {
     		String paraName = p.getName().asString();
             ParamNode paramNode = requestNode.getParamNodeByName(paraName);
+          //  String orignType=paramNode.getType();
             if(paramNode!=null){
             	NodeList<AnnotationExpr> annotationExprList= p.getAnnotations();
             	for (AnnotationExpr an : annotationExprList) {
@@ -181,8 +189,9 @@ public class SpringControllerParser extends AbsControllerParser {
                     }
             		
             		 if ("RequestBody".equals(name)) {
-                         String type = p.getType().asString();
-                         setRequestBody(paramNode, type);
+                         
+                         setRequestBody(paramNode, p.getType(),md.getJavadoc());
+                        
                      }
             		 
             		 if (an instanceof MarkerAnnotationExpr) {
@@ -201,8 +210,14 @@ public class SpringControllerParser extends AbsControllerParser {
             		 
 				}
             }
+            
+           // paramNode.setType(orignType);
 		}
 	}
+
+	
+
+	
 
 	private void parserMethodAnnotations(RequestNode requestNode, MethodDeclaration md) {
     	NodeList<AnnotationExpr> annotationList= md.getAnnotations();
@@ -258,6 +273,61 @@ public class SpringControllerParser extends AbsControllerParser {
 		
 	}
 
+    private void setRequestBody(ParamNode paramNode, Type type, Javadoc javadoc) {
+		Boolean isMap=false;
+    	if(type instanceof ClassOrInterfaceType){
+			ClassOrInterfaceType cot=(ClassOrInterfaceType) type;
+			String name=cot.getNameAsString();
+			if(name.equals("Map")||name.equals("HashMap")||name.equals("TreeMap")||name.equals("Hashtable")||name.equals("LinkedHashMap")){
+				isMap=true;
+				if(javadoc!=null){
+					List<JavadocBlockTag> tagList=javadoc.getBlockTags();
+					ClassNode classNode = new ClassNode();
+					classNode.setClassName(type.asString());
+					for (JavadocBlockTag javadocBlockTag : tagList) {
+						if(javadocBlockTag.getTagName().equals("param")){
+							Boolean isList=false;
+							String mapdes=javadocBlockTag.getContent().toText().replaceAll("[ ]+", " ");
+							String array[]=mapdes.split(" ");
+							String maptype=array[0];
+							FieldNode fieldNode=new FieldNode();
+							fieldNode.setType(maptype);
+							fieldNode.setName(javadocBlockTag.getName());
+							if(array.length==2) fieldNode.setDescription(array[1]);
+						    if(maptype.endsWith("[]")) isList=true;
+							
+							
+							File f=null;
+						    try{
+						    	f=ParseUtils.searchJavaFile(getControllerFile(), maptype);
+						    }catch (Exception e) {
+								System.out.println(maptype+" can not to find java file");
+							}
+						    
+						    if(f!=null){
+						    	ResponseNode cn=new ResponseNode();
+						    	cn.setClassName(Utils.getJavaFileName(f));
+						    	cn.setList(isList);
+						    	ParseUtils.parseResponseNode(f, cn);
+						    	fieldNode.setChildResponseNode(cn);
+						    }
+						    
+						    classNode.addChildNode(fieldNode);
+						}
+					}
+					paramNode.setNeedjson(true);
+					paramNode.setJsonBody(classNode.toJsonApi());
+					
+				}
+			}
+		}
+		
+		if(!isMap){
+			setRequestBody(paramNode,type.asString());
+		}
+		
+	}
+	
 	private void setRequestBody(ParamNode paramNode, String rawType) {
         String modelType;
         boolean isList;
@@ -277,8 +347,8 @@ public class SpringControllerParser extends AbsControllerParser {
             classNode.setClassName(modelType);
             classNode.setList(isList);
             ParseUtils.parseResponseNode(ParseUtils.searchJavaFile(getControllerFile(), modelType), classNode);
-            paramNode.setJsonBody(true);
-            paramNode.setDescription(classNode.toJsonApi());
+            paramNode.setNeedjson(true);
+            paramNode.setJsonBody(classNode.toJsonApi());
         }
     }
 

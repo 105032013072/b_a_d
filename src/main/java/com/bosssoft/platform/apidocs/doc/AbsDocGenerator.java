@@ -299,18 +299,21 @@ public abstract class AbsDocGenerator{
                 
                 //构造json、Android Code、IOS Code值以及页面
                 List<RequestNode> requestNodeList= controllerNode.getRequestNodes();
-                for (RequestNode requestNode : requestNodeList) {
-                	 JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(requestNode.getResponseNode());
-                     String javaurl =javaCodeGenerator.generateCode();
-                     javaurl=DocContext.getDocPath()+File.separator+javaurl;
-                     requestNode.setAndroidCodeUrl(javaurl);
-                     
-                     ModelCodeGenerator iosCodeGenerator = new ModelCodeGenerator(requestNode.getResponseNode());
-                     String iosUrl = iosCodeGenerator.generateCode();
-                     iosUrl=DocContext.getDocPath()+File.separator+iosUrl;
-                     requestNode.setiOSCodeUrl(iosUrl);
-                     
-                     requestNode.setResponseJson(requestNode.getResponseNode().toJsonApi());
+				for (RequestNode requestNode : requestNodeList) {
+					if (requestNode.getResponseNode() != null) {
+						JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(requestNode.getResponseNode());
+						String javaurl = javaCodeGenerator.generateCode();
+						javaurl = DocContext.getDocPath() + File.separator + javaurl;
+						requestNode.setAndroidCodeUrl(javaurl);
+
+						ModelCodeGenerator iosCodeGenerator = new ModelCodeGenerator(requestNode.getResponseNode());
+						String iosUrl = iosCodeGenerator.generateCode();
+						iosUrl = DocContext.getDocPath() + File.separator + iosUrl;
+						requestNode.setiOSCodeUrl(iosUrl);
+
+						requestNode.setResponseJson(requestNode.getResponseNode().toJsonApi());
+					}
+
 				}
                 
                 String htmlPath=DocContext.getDocPath()+File.separator+controllerNode.getModelName()+File.separator+"controller"+File.separator+controllerNode.getClassName()+".html";

@@ -23,6 +23,7 @@ import com.bosssoft.platform.apidocs.parser.mate.Explain;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
 import com.bosssoft.platform.apidocs.parser.mate.Model;
 import com.bosssoft.platform.apidocs.parser.mate.ParamNode;
+import com.bosssoft.platform.apidocs.parser.mate.RequestNode;
 import com.bosssoft.platform.apidocs.parser.mate.ServiceNode;
 import com.bosssoft.platform.common.utils.FileUtils;
 import com.lowagie.text.Anchor;
@@ -428,27 +429,35 @@ public class WordUtils {
 
 	/**
 	 * 创建controller返回结果的javacode和IOSCode
-	 * @param className
+	 * @param requestNode
 	 * @throws Exception
 	 */
-	public void renderCode(String className)throws Exception{
+	public void renderCode(RequestNode requestNode)throws Exception{
 		com.lowagie.text.List subList=new com.lowagie.text.List(false, false, 10);
 		subList.setListSymbol("\u2022");
-		ListItem item=new ListItem("返回结果："+className+"  ");
-		item.setSpacingBefore(4);
-		
-		Anchor androidlink = new Anchor("Android Code",linkFont);
-    	androidlink.setReference("#3.1."+WordDocBuilder.javaCodeOrderMap.get(className));
-    	item.add(androidlink);
-		
-    	
-    	item.add(new Chunk("|"));
-    	
-    	Anchor IOSlink = new Anchor("IOS Code",linkFont);
-    	IOSlink.setReference("#3.2."+WordDocBuilder.javaCodeOrderMap.get(className));
-    	item.add(IOSlink);
-    	
-		item.setSpacingBefore(6);
+		ListItem item=null;
+		if(requestNode.getResponseNode()!=null){
+			
+			item=new ListItem("返回结果：");
+			item.setSpacingBefore(6);
+			
+			Anchor androidlink = new Anchor("Android Code",linkFont);
+	    	androidlink.setReference("#3.1."+WordDocBuilder.javaCodeOrderMap.get(requestNode.getResponseNode().getClassName()));
+	    	item.add(androidlink);
+			
+	    	
+	    	item.add(new Chunk("|"));
+	    	
+	    	Anchor IOSlink = new Anchor("IOS Code",linkFont);
+	    	IOSlink.setReference("#3.2."+WordDocBuilder.javaCodeOrderMap.get(requestNode.getResponseNode().getClassName()));
+	    	item.add(IOSlink);
+	    	
+			
+		}else{
+			item=new ListItem("返回结果："+requestNode.getReturnString()+"  ");
+			item.setSpacingBefore(6);
+		}
+		subList.setIndentationLeft(35);
         subList.add(item);
         document.add(subList); 
 	}

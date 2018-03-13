@@ -599,7 +599,7 @@ public class ParseUtils {
   	}else if(type instanceof ClassOrInterfaceType) {
   		ClassOrInterfaceType cot=(ClassOrInterfaceType) type;
   		String name=cot.getNameAsString();
-  		if(name.equals("Map")||name.equals("HashMap")||name.equals("TreeMap")||name.equals("Hashtable")){
+  		if(name.equals("Map")||name.equals("HashMap")||name.equals("TreeMap")||name.equals("Hashtable")||name.equals("LinkedHashMap")){
   			NodeList<Type> list=cot.getTypeArguments();
   			if(list.size()>0){
   				return getBasicType(list.get(1));

@@ -150,6 +150,17 @@ public abstract class AbsControllerParser {
 				requestNode.setMethodName(ParseUtils.parserMethodName(m));
                 if( m.getAnnotationByClass(Deprecated.class)!=null) requestNode.setDeprecated(true);
 				
+                //参数名以及类型
+                NodeList<Parameter> paramList= m.getParameters();
+                for (Parameter p : paramList) {
+                	ParamNode paramNode = new ParamNode();
+                    paramNode.setName(p.getName().asString());
+                	paramNode.setType(p.getType().asString());
+                	requestNode.addParamNode(paramNode);
+				}
+                
+                
+                
               //方法上的注释（说明以及param）
                 Javadoc javadoc=m.getJavadoc();
                 if(javadoc!=null){
@@ -158,24 +169,15 @@ public abstract class AbsControllerParser {
                     List<JavadocBlockTag> tagList=javadoc.getBlockTags();
                     for (JavadocBlockTag javadocBlockTag : tagList) {
 						if(javadocBlockTag.getTagName().equals("param")){
-							ParamNode paramNode = new ParamNode();
-                            paramNode.setName(javadocBlockTag.getName());
-                            paramNode.setDescription(javadocBlockTag.getContent().toText());
-                            requestNode.addParamNode(paramNode);
+							ParamNode paramNode = requestNode.getParamNodeByName(javadocBlockTag.getName());
+							if(paramNode!=null){
+								paramNode.setDescription(javadocBlockTag.getContent().toText());
+							}
 						}
 					}
 
                 }
 				
-                //参数名以及类型
-                NodeList<Parameter> paramList= m.getParameters();
-                for (Parameter p : paramList) {
-					String paraName=p.getName().asString();
-					ParamNode paramNode = requestNode.getParamNodeByName(paraName);
-                    if(paramNode != null){
-                        paramNode.setType(ParseUtils.unifyType(p.getType().asString()));
-                    }
-				}
                 afterHandleMethod(requestNode, m);
 
                 //解析返回参数
@@ -304,6 +306,7 @@ public abstract class AbsControllerParser {
        	    ResponseNode responseNode = new ResponseNode();
        	 responseNode= buildResponseNode(resultClassType);
        	requestNode.setResponseNode(responseNode);
+       //	requestNode.setReturnString(responseNode.getClassName());
        	    
     	}else if(an instanceof NormalAnnotationExpr){
     		NodeList<Expression> keyList=new NodeList<>();
@@ -384,7 +387,7 @@ public abstract class AbsControllerParser {
 		List<MethodDeclaration> list=c.getChildNodesByType(MethodDeclaration.class);
 		
 		for (MethodDeclaration m : list) {
-			if(m.getModifiers().contains(Modifier.PUBLIC) && m.getAnnotationByName("ApiDoc")!=null){
+			if(m.getModifiers().contains(Modifier.PUBLIC)){
 				result.add(m);
 			}
 		}
