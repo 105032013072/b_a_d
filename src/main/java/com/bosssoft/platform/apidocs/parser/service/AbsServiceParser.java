@@ -48,6 +48,7 @@ public abstract  class AbsServiceParser {
     	
     	String serviceName=Utils.getJavaFileName(javaFile);
     	ClassOrInterfaceDeclaration declaration=compilationUnit.getClassByName(serviceName);
+    	serviceNode.setImplClassName(serviceName);
     	
     	if(declaration!=null){
     		//获取实现的接口

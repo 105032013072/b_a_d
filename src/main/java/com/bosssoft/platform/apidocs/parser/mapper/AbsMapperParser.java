@@ -58,7 +58,6 @@ public abstract class AbsMapperParser {
 
 		List<MethodDeclaration> implementMethodDeclarationList=getMethodDeclaration(declaration);
 	    for (MethodDeclaration m : implementMethodDeclarationList) {
-	    	System.out.println(">>>>>> methodName: "+m.getNameAsString());
 	    	InterfaceNode  interfaceNode=new InterfaceNode();
 	    	
 	    	//方法名

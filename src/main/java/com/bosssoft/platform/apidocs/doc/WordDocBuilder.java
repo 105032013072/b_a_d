@@ -160,7 +160,7 @@ public class WordDocBuilder {
 		int number=1;
 		for (ServiceNode serviceNode : serviceNodeList) {
 			wordUtils.renderTitle(titleStr+"."+(number++)+"  "+serviceNode.getDescription(), WordTitleType.TITLE_4);
-			wordUtils.renderClassName(serviceNode.getClassName());
+			wordUtils.renderClassName(serviceNode.getImplClassName());
 			
 			//数据访问接口调用
 			wordUtils.renderListTitle("数据访问接口调用",WordListType.DIAMOND);

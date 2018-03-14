@@ -5,7 +5,8 @@ import java.util.List;
 
 public class ServiceNode extends ParentNode{
 
-    
+    private String implClassName;//实现类的类名
+	
     private List<Explain> autowiredMapperList= new ArrayList<>();
     
     private List<InterfaceNode> interfaceNodes = new ArrayList<>();
@@ -34,6 +35,14 @@ public class ServiceNode extends ParentNode{
 
 	public void addAutowiredMapper(Explain autowiredMapper) {
 		this.autowiredMapperList.add(autowiredMapper);
+	}
+
+	public String getImplClassName() {
+		return implClassName;
+	}
+
+	public void setImplClassName(String implClassName) {
+		this.implClassName = implClassName;
 	}
 	
 	

@@ -208,7 +208,6 @@ public class DocContext {
 			@Override
 			public boolean accept(File f, String name) {
                 if(f.getName().equals("package-info.java")){
-                	System.out.println(f.getName());
                 	CompilationUnit compilationUnit=ParseUtils.compilationUnit(f);
                 	Comment comment=compilationUnit.getPackageDeclaration().getComment();
                 	String [] docArray=comment.toString().split("\r\n");
