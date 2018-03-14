@@ -48,7 +48,8 @@ public class ParseUtils {
     public static File searchJavaFile(File inJavaFile, String className){
        File file = searchJavaFileInner(inJavaFile, className);
        if(file == null){
-           throw new RuntimeException("cannot find java file , in java file : " + inJavaFile.getAbsolutePath() + ", className : " +className);
+    	   LogUtils.error("cannot find java file , in java file : " + inJavaFile.getAbsolutePath() + ", className : " +className);
+           //throw new RuntimeException();
        }
        return file;
     }
@@ -185,13 +186,15 @@ public class ParseUtils {
         if(cPaths.length == 0){
             return null;
         }
-        String javaFilePath = DocContext.getJavaSrcPath() + Utils.joinArrayString(cPaths, "/") +".java";
-        File javaFile = new File(javaFilePath);
-        if(javaFile.exists() && javaFile.isFile()){
-            return javaFile;
-        }else{
-            return backTraceJavaFileByName(Arrays.copyOf(cPaths, cPaths.length - 1));
-        }
+        List<String> javaSrcPathList= DocContext.getJavaSrcPathList();
+        for (String srcPath : javaSrcPathList) {
+        	String javaFilePath = srcPath + Utils.joinArrayString(cPaths, "/") +".java";
+        	 File javaFile = new File(javaFilePath);
+        	 if(javaFile.exists() && javaFile.isFile()){
+        		 return javaFile;
+        	 }
+		}
+        return backTraceJavaFileByName(Arrays.copyOf(cPaths, cPaths.length - 1));
     }
 
     /**
@@ -318,7 +321,8 @@ public class ParseUtils {
                     
                     NodeList<VariableDeclarator> variableList=fd.getVariables();
                     for (VariableDeclarator v : variableList) {
-                    	 FieldNode fieldNode = new FieldNode();
+               
+                    	FieldNode fieldNode = new FieldNode();
                          responseNode.addChildNode(fieldNode);
                          /*if(fd.getComment()!=null){
                         	 fieldNode.setDescription(fd.getComment().getContent());
@@ -363,6 +367,8 @@ public class ParseUtils {
                         			String genericType = classOrInterfaceType.getNameAsString();
                                     parseChildResponseNode(fieldNode, modelJavaFile, genericType, Boolean.TRUE);
                         		}
+                        	 }else if(isMapType(type)){
+                        		 fieldNode.setType(type);
                         	 }else{
                         		 parseChildResponseNode(fieldNode, modelJavaFile, type, Boolean.FALSE); 
                         	 }
@@ -388,6 +394,11 @@ public class ParseUtils {
                     .stream()
                     .filter( em -> type.endsWith(em.getNameAsString()))
                     .findFirst();*/
+            if(childJavaFile==null){
+            	 parentNode.setType(isList ? unifyType + "[]" : unifyType);
+            	 return ;
+            }
+            
             EnumDeclaration ed=null;
             List<EnumDeclaration> list= compilationUnit(childJavaFile).getChildNodesByType(EnumDeclaration.class);
             for (EnumDeclaration enumDeclaration : list) {
@@ -495,6 +506,20 @@ public class ParseUtils {
         }
     }
     
+    public static boolean isMapType(String className){
+        String[] cPaths = className.split("\\.");
+        String genericType = cPaths[cPaths.length - 1];
+        int genericLeftIndex = genericType.indexOf("<");
+        String rawType = genericLeftIndex != -1 ? genericType.substring(0, genericLeftIndex) : genericType;
+        String collectionClassName = "java.util."+rawType;
+        try{
+            Class collectionClass = Class.forName(collectionClassName);
+            return Map.class.isAssignableFrom(collectionClass);
+        }catch (ClassNotFoundException e){
+            return false;
+        }
+    }
+    
     
     /**
 	 * 获取类的实现接口
@@ -503,9 +528,10 @@ public class ParseUtils {
 	 * @return
 	 */
   public static ClassOrInterfaceDeclaration parserImplementInterface(File javaFile,ClassOrInterfaceDeclaration cod){
+	  ClassOrInterfaceDeclaration cid = null;
 	  String  implementClassName=cod.getImplementedTypes(0).getNameAsString();
 		File modelJavaFile=ParseUtils.searchJavaFile(javaFile, implementClassName);
-		ClassOrInterfaceDeclaration cid = null;
+		if(modelJavaFile==null)  return cid;
 		List<ClassOrInterfaceDeclaration> list = ParseUtils.compilationUnit(modelJavaFile).getChildNodesByType(ClassOrInterfaceDeclaration.class);
 		for (ClassOrInterfaceDeclaration classOrInterfaceDeclaration : list) {
 			if (implementClassName.endsWith(classOrInterfaceDeclaration.getNameAsString())) {
@@ -573,22 +599,20 @@ public class ParseUtils {
   }
   
   public static ReturnNode constructReturnNode(File javaFile,MethodDeclaration methodDeclaration){
-	  ReturnNode returnNode=new ReturnNode();
-	  returnNode.setType(methodDeclaration.getType().asString());
-	  String baisctype=getBasicType(methodDeclaration.getType());
-	  File f=null;
-      try{
-    	   f=  ParseUtils.searchJavaFile(javaFile, baisctype);
-      }catch (Exception e) {
-	    System.out.println(baisctype+" can not to file java file");
-	  }
-     if(f!=null){
-    	 ResponseNode responseNode = new ResponseNode();
-    	 responseNode.setClassName(Utils.getJavaFileName(f));
-         ParseUtils.parseResponseNode(f, responseNode);
-         returnNode.setJsonString((responseNode.toJsonApi())); 
-     }
-	  return returnNode;
+		ReturnNode returnNode = new ReturnNode();
+		returnNode.setType(methodDeclaration.getType().asString());
+		String baisctype = getBasicType(methodDeclaration.getType());
+		File f = null;
+
+		f = ParseUtils.searchJavaFile(javaFile, baisctype);
+
+		if (f != null) {
+			ResponseNode responseNode = new ResponseNode();
+			responseNode.setClassName(Utils.getJavaFileName(f));
+			ParseUtils.parseResponseNode(f, responseNode);
+			returnNode.setJsonString((responseNode.toJsonApi()));
+		}
+		return returnNode;
   }
   
   public static String getBasicType(Type type) {
@@ -708,7 +732,7 @@ public class ParseUtils {
 	  String doc=null;
 	  Javadoc javadoc=fieldDeclaration.getJavadoc();
 	  if(javadoc!=null) {
-		 doc=javadoc.toText();
+		 doc=javadoc.toText().trim();
 	  }else if(fieldDeclaration.getComment()!=null){
 		  doc=fieldDeclaration.getComment().getContent();
 	  }else{

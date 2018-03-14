@@ -35,7 +35,7 @@ public class JFinalRoutesParser {
 
     private JFinalRoutesParser(){
         List<File> result = new ArrayList<>();
-        Utils.wideSearchFile(new File(DocContext.getJavaSrcPath()), new FilenameFilter() {
+        Utils.wideSearchFile(new File(DocContext.getFirstSrcPath()), new FilenameFilter() {
             @Override
             public boolean accept(File f, String name) {
                 /*return ParseUtils.compilationUnit(f).getChildNodesByType(ClassOrInterfaceDeclaration.class)

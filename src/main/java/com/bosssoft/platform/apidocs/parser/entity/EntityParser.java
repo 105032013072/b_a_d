@@ -9,6 +9,7 @@ import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.parser.mate.AttributeNode;
 import com.bosssoft.platform.apidocs.parser.mate.EntityNode;
 import com.bosssoft.platform.apidocs.parser.mate.MapperNode;
+import com.bosssoft.platform.common.utils.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -80,7 +81,12 @@ public class EntityParser {
 			}
 			
 			if(attributeNode.getIsPrimaryKey()){
-				attributeNode.setDescription("主键，"+attributeNode.getDescription());
+				if(StringUtils.isNotNullAndBlank(attributeNode.getDescription())){
+					attributeNode.setDescription("主键，"+attributeNode.getDescription());
+				}else {
+					attributeNode.setDescription("主键");
+				}
+				  
 			}
 			entityNode.addAttributeNode(attributeNode);
 		}

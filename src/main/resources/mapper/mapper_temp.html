@@ -40,9 +40,9 @@
    </tr>
    <#list interfaceNode.paramNodes as paramNode>
    <tr>
-         <td >${paramNode.name}</td>
-         <td >${paramNode.type}</td>
-         <td >${paramNode.description}</td>
+         <td >${paramNode.name?default("")}</td>
+         <td >${paramNode.type?default("")}</td>
+         <td >${paramNode.description?default("")}</td>
    </tr>
    </#list>
   </table>

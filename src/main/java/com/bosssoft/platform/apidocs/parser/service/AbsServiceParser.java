@@ -52,7 +52,7 @@ public abstract  class AbsServiceParser {
     	if(declaration!=null){
     		//获取实现的接口
     		ClassOrInterfaceDeclaration implementDeclaration=ParseUtils.parserImplementInterface(javaFile, declaration);
-    	
+    		
     		//解析类的注释
     		parseClassDocs(declaration,implementDeclaration);
  
@@ -88,6 +88,7 @@ public abstract  class AbsServiceParser {
 	}
 
 	private void parseMethodDocs(ClassOrInterfaceDeclaration declaration, ClassOrInterfaceDeclaration implementDeclaration) {
+		if(implementDeclaration==null ) implementDeclaration=declaration;
 		List<MethodDeclaration> implementMethodDeclarationList=getMethodDeclaration(implementDeclaration);
 	    for (MethodDeclaration m : implementMethodDeclarationList) {
 	    	InterfaceNode  interfaceNode=new InterfaceNode();
@@ -195,7 +196,14 @@ public abstract  class AbsServiceParser {
 			serviceNode.setDescription(declaration.getNameAsString());
 		}
 		
-		serviceNode.setClassName(implementDeclaration.getNameAsString());
+		
+		if(implementDeclaration!=null){
+			serviceNode.setClassName(implementDeclaration.getNameAsString());
+		}else{
+			String name=declaration.getImplementedTypes(0).getNameAsString();
+			serviceNode.setClassName(name);
+		}
+		
 
 	}
 	

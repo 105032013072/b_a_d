@@ -34,6 +34,9 @@ public class LogUtils {
     public static void error(String message, Object... args){
         LOGGER.severe(String.format(message, args));
     }
+    public static void error(String message){
+        LOGGER.severe(message);
+    }
 
     public static void error(String message, Throwable e){
         LOGGER.log(Level.SEVERE, message, e);

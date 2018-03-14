@@ -68,12 +68,12 @@
   
   
   <#if requestNode.responseJson??>
-    <p>返回结果: ${requestNode.returnString?default("")?html}<a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
+    <p><strong>返回结果:</strong> ${requestNode.returnString?default("")?html} <a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
     <pre class="prettyprint lang-json">
       ${requestNode.responseJson}
     </pre>
   <#else> 
-    <p>返回结果: ${requestNode.returnString}</p>
+    <p><strong>返回结果:</strong> ${requestNode.returnString}</p>
   </#if>
   
   

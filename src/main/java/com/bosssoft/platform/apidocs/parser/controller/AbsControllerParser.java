@@ -145,7 +145,11 @@ public abstract class AbsControllerParser {
     	//jdk1.7
     	List<MethodDeclaration> MethodDeclarationList=getMethodDeclaration(c);
     	for (MethodDeclaration m : MethodDeclarationList) {
-			if(m.getAnnotationByName("RequestMapping")!=null||m.getAnnotationByName("GetMapping")!=null||m.getAnnotationByName("PostMapping")!=null){
+			if("getAfaApplication".equals(m.getNameAsString())){
+				System.out.println(">>");
+			}
+    		
+    		if(m.getAnnotationByName("RequestMapping")!=null||m.getAnnotationByName("GetMapping")!=null||m.getAnnotationByName("PostMapping")!=null){
 				RequestNode requestNode = new RequestNode();
 				requestNode.setMethodName(ParseUtils.parserMethodName(m));
                 if( m.getAnnotationByClass(Deprecated.class)!=null) requestNode.setDeprecated(true);

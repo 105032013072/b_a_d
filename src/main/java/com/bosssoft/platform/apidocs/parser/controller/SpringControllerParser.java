@@ -175,6 +175,7 @@ public class SpringControllerParser extends AbsControllerParser {
     }
 
     private void parserParameterAnnotations(RequestNode requestNode, MethodDeclaration md) {
+
     	NodeList<Parameter> parameterList= md.getParameters();
     	for (Parameter p : parameterList) {
     		String paraName = p.getName().asString();
@@ -346,9 +347,13 @@ public class SpringControllerParser extends AbsControllerParser {
             ClassNode classNode = new ClassNode();
             classNode.setClassName(modelType);
             classNode.setList(isList);
-            ParseUtils.parseResponseNode(ParseUtils.searchJavaFile(getControllerFile(), modelType), classNode);
-            paramNode.setNeedjson(true);
-            paramNode.setJsonBody(classNode.toJsonApi());
+            
+            File javaFile=ParseUtils.searchJavaFile(getControllerFile(), modelType);
+            if(javaFile!=null){
+            	ParseUtils.parseResponseNode(javaFile, classNode);
+                paramNode.setNeedjson(true);
+                paramNode.setJsonBody(classNode.toJsonApi());
+            }
         }
     }
 

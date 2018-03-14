@@ -94,7 +94,7 @@ public class PlayRoutesParser {
     }
 
     private String getControllerFile(String relativePath){
-        return DocContext.getJavaSrcPath()+ relativePath + ".java";
+        return DocContext.getFirstSrcPath()+ relativePath + ".java";
     }
 
     public static class RouteNode {

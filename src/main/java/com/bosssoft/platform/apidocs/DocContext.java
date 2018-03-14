@@ -16,6 +16,7 @@ import com.bosssoft.platform.apidocs.parser.mate.Model;
 import com.bosssoft.platform.apidocs.parser.mate.ResponseNode;
 import com.bosssoft.platform.apidocs.parser.service.AbsServiceParser;
 import com.bosssoft.platform.apidocs.parser.service.SpringServiceParser;
+import com.bosssoft.platform.common.utils.StringUtils;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -28,6 +29,11 @@ import java.util.*;
 
 import javax.swing.text.html.parser.Entity;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 
 
 /**
@@ -39,7 +45,7 @@ public class DocContext {
 
 	private static String projectPath;
 	private static String docPath;
-	private static String javaSrcPath;
+	private static List<String> javaSrcPathList;
 	private static AbsControllerParser controllerParser;
 	private static AbsServiceParser serviceParser;
 	private static AbsMapperParser mapperParser;
@@ -61,13 +67,97 @@ public class DocContext {
 		setDocPath(config.docsPath);
 		Resources.setUserCodeTplPath(config.codeTplPath);
 
+		serviceFiles = new ArrayList<>();
+		controllerFiles=new ArrayList<>();
+		entityFiles=new ArrayList<>();
+		mapperFile=new ArrayList<>();
+		modelMap=new LinkedHashMap<>();
+		modelPackageMap=new HashMap<>();
+		
 		File logFile = getLogFile();
 		if (logFile.exists()) {
 			logFile.delete();
 		}
 
 		// try to find javaSrcPath
-		final File projectDir = new File(projectPath);
+		loadjavaSrcPath();
+		
+		 File projectDir = new File(projectPath);
+		
+
+		LogUtils.info("find java src path : %s", javaSrcPathList);
+
+		// which mvc framework
+		ProjectType projectType = null;
+		if (config.isSpringMvcProject()) {
+			projectType = ProjectType.SPRING;
+		} else if (config.isJfinalProject()) {
+			projectType = ProjectType.JFINAL;
+		} else if (config.isPlayProject()) {
+			projectType = ProjectType.PLAY;
+		} else if (config.isGeneric()) {
+			projectType = ProjectType.GENERIC;
+		}
+
+		for (String srcPath : javaSrcPathList) {
+			if(projectType != null) break;
+			
+			File javaSrcDir = new File(srcPath);
+			if (Utils.isPlayFramework(projectDir)) {
+				projectType = ProjectType.PLAY;
+			} else if (Utils.isJFinalFramework(javaSrcDir)) {
+				projectType = ProjectType.JFINAL;
+			} else if (Utils.isSpringFramework(javaSrcDir)) {
+				projectType = ProjectType.SPRING;
+			} else {
+				projectType = ProjectType.GENERIC;
+			}
+			
+		}
+		
+		
+		
+		for (String srcPath : javaSrcPathList) {
+			File javaSrcDir = new File(srcPath);
+			loadProjectModel(javaSrcDir);
+			loadControlelrFile(projectType, javaSrcDir);
+			loadServiceFile(projectType, javaSrcDir);
+			loadMapperFile(javaSrcDir);
+			loadEntityFile(javaSrcDir);
+		}
+	
+	}
+
+	private static void loadjavaSrcPath() {
+		 javaSrcPathList=new ArrayList<String>();
+		try{
+			//加载pom.xml 确定模块
+			File file = new File(projectPath+File.separator+"pom.xml");
+			Document doc = Jsoup.parse(file, "UTF-8");
+			Elements models = doc.select("project").select("modules");
+			if (!models.isEmpty()) {
+				Iterator<Element> it = models.select("module").iterator();
+				while (it.hasNext()) {
+					Element element = it.next();
+			        String srcPath=parse(projectPath+File.separator+element.html());
+			        if(StringUtils.isNotNullAndBlank(srcPath))  javaSrcPathList.add(srcPath);
+				}
+			} else {
+				 String srcPath=parse(projectPath);
+			     if(StringUtils.isNotNullAndBlank(srcPath))  javaSrcPathList.add(srcPath);
+			}
+		}catch(Exception e){
+			LogUtils.error("load pom.xml error", e);
+			 String srcPath=parse(projectPath);
+		     if(StringUtils.isNotNullAndBlank(srcPath))  javaSrcPathList.add(srcPath);
+		}
+	
+	}
+
+	//根据项目路径解析src路径
+	private static String parse(String path) {
+		String projectSrc="";
+		 File projectDir = new File(path);
 		List<File> result = new ArrayList<>();
 		Utils.wideSearchFile(projectDir, new FilenameFilter() {
 			@Override
@@ -91,7 +181,8 @@ public class DocContext {
 		}, result, true);
 
 		if (result.isEmpty()) {
-			throw new RuntimeException("cannot find any java file in this project : " + projectPath);
+			LogUtils.error("cannot find any java file in this project : " + path);
+			return projectSrc;
 		}
 
 		File oneJavaFile = result.get(0);
@@ -100,54 +191,18 @@ public class DocContext {
 		PackageDeclaration packageDeclaration = ParseUtils.compilationUnit(oneJavaFile).getPackageDeclaration();
 		String parentPath = oneJavaFile.getParentFile().getAbsolutePath();
 		if (packageDeclaration != null) {
-			DocContext.javaSrcPath = parentPath.substring(0,
+			projectSrc = parentPath.substring(0,
 					parentPath.length() - packageDeclaration.getNameAsString().length());
 		} else {
-			DocContext.javaSrcPath = parentPath + "/";
+			projectSrc= parentPath + "/";
 		}
-
-		result.clear();
-
-		LogUtils.info("find java src path : %s", javaSrcPath);
-
-		File javaSrcDir = new File(javaSrcPath);
-
-		// which mvc framework
-		ProjectType projectType = null;
-		if (config.isSpringMvcProject()) {
-			projectType = ProjectType.SPRING;
-		} else if (config.isJfinalProject()) {
-			projectType = ProjectType.JFINAL;
-		} else if (config.isPlayProject()) {
-			projectType = ProjectType.PLAY;
-		} else if (config.isGeneric()) {
-			projectType = ProjectType.GENERIC;
-		}
-
-		if (projectType == null) {
-			if (Utils.isPlayFramework(projectDir)) {
-				projectType = ProjectType.PLAY;
-			} else if (Utils.isJFinalFramework(javaSrcDir)) {
-				projectType = ProjectType.JFINAL;
-			} else if (Utils.isSpringFramework(javaSrcDir)) {
-				projectType = ProjectType.SPRING;
-			} else {
-				projectType = ProjectType.GENERIC;
-			}
-		}
-
-		loadProjectModel(javaSrcDir);
-		loadControlelrFile(projectType, javaSrcDir);
-		loadServiceFile(projectType, javaSrcDir);
-		loadMapperFile(javaSrcDir);
-		loadEntityFile(javaSrcDir);
-
+		
+		return projectSrc;
 	}
 
 	private static void loadProjectModel(File javaSrcDir) {
 		List<File> result=new ArrayList<>();
-		modelMap=new LinkedHashMap<>();
-		modelPackageMap=new HashMap<>();
+		
 		
 		Utils.wideSearchFile(javaSrcDir, new FilenameFilter() {
 			@Override
@@ -178,7 +233,7 @@ public class DocContext {
 	private static void loadEntityFile(File javaSrcDir) {
 		List<File> result=new ArrayList<>();
 		entityParser=new EntityParser();
-		entityFiles=new ArrayList<>();
+		
 		Utils.wideSearchFile(javaSrcDir, new FilenameFilter() {
 			@Override
 			public boolean accept(File f, String name) {
@@ -202,7 +257,7 @@ public class DocContext {
 		//加载mapper文件(mybatis)
 		List<File> result=new ArrayList<>();
 		mapperParser=new MybatisMapperParser();
-		mapperFile=new ArrayList<>();
+		
 		Utils.wideSearchFile(javaSrcDir, new FilenameFilter() {
 			@Override
 			public boolean accept(File f, String name) {
@@ -219,7 +274,7 @@ public class DocContext {
 	private static void loadServiceFile(ProjectType projectType, File javaSrcDir) {
 		// 加载service的类文件()
 		List<File> result = new ArrayList<>();
-		serviceFiles = new ArrayList<>();
+		
 		switch (projectType) {
 		case SPRING:
 			serviceParser = new SpringServiceParser();
@@ -248,7 +303,6 @@ public class DocContext {
 	private static void loadControlelrFile(ProjectType projectType, File javaSrcDir) {
 		// 加载controller类文件
 		List<File> result = new ArrayList<>();
-		controllerFiles = new ArrayList<>();
 		Set<String> controllerFileNames;
 
 		switch (projectType) {
@@ -400,9 +454,7 @@ public class DocContext {
 	 * 
 	 * @return
 	 */
-	public static String getJavaSrcPath() {
-		return javaSrcPath;
-	}
+	
 
 	/**
 	 * get all controllers in this project
@@ -413,6 +465,13 @@ public class DocContext {
 		return controllerFiles.toArray(new File[controllerFiles.size()]);
 	}
 
+	public static List<String> getJavaSrcPathList() {
+		return javaSrcPathList;
+	}
+
+	public static String getFirstSrcPath(){
+		return javaSrcPathList.get(0);
+	}
 	/**
 	 * get controller parser, it will return different parser by different
 	 * framework you are using.
