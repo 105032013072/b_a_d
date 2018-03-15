@@ -61,6 +61,9 @@ public class HtmlDocBuilder {
 		case CLASSINDEX:
 			templatePath=parantPath+File.separator+"index"+File.separator+"index_temp.html";
 			break;
+		case MODELINDEX:
+			templatePath=parantPath+File.separator+"index"+File.separator+"model_index_temp.html";
+			break;
 		case WELCOM:
 			templatePath=parantPath+File.separator+"index"+File.separator+"welcome.html";
 			break;

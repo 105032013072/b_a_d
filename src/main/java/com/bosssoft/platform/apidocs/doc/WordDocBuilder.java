@@ -70,9 +70,6 @@ public class WordDocBuilder {
 				wordUtils.renderContent("1) 实体名: "+entityNode.getClassName());
 				wordUtils.renderContent("2) 对应表: "+entityNode.getTableName());
 				wordUtils.renderContent("3) 属性列表： ");
-				
-				/*String titleContent="表"+(number++)+"-1 "+entityNode.getClassName()+"属性说明";
-				wordUtils.renderTableTitle(titleContent);*/
 				wordUtils.renderEntityTable(entityNode.getAttributeList());
 			}
 			
@@ -96,7 +93,7 @@ public class WordDocBuilder {
 			}
 			
 			
-			//附录
+			/*//附录
 			wordUtils.renderTitle("3.附录", WordTitleType.TITLE_1);
 			
 			//javacode
@@ -113,7 +110,7 @@ public class WordDocBuilder {
 			for (Entry<String, String> entity : iosCodeMap.entrySet()) {
 				wordUtils.renderTitle("3.2."+(number++)+"  "+entity.getKey(), WordTitleType.TITLE_3);
 				wordUtils.renderJsonStr(formateStr(entity.getValue()));
-			}
+			}*/
 			
 			wordUtils.endDoc();
 		}catch(Exception e){
@@ -225,8 +222,14 @@ public class WordDocBuilder {
 				wordUtils.renderContent((requestnum++)+"."+requestNode.getDescription());
 				wordUtils.renderListTitle("method: "+String.join(",", requestNode.getMethod()), WordListType.SPOTS);
 				wordUtils.renderListTitle("url: "+requestNode.getUrl(), WordListType.SPOTS);
-				wordUtils.renderListTitle("参数列表: ", WordListType.SPOTS);
-				wordUtils.renderParamTableHashRequired(requestNode.getParamNodes());
+				if(requestNode.getParamNodes().size()>0){
+					wordUtils.renderListTitle("参数列表: ", WordListType.SPOTS);
+					wordUtils.renderParamTableHashRequired(requestNode.getParamNodes());
+				}else {
+					wordUtils.renderListTitle("参数列表:  无", WordListType.SPOTS);
+				}
+				
+				
 				
 				List<ParamNode> params= requestNode.getParamNodes();
 				if(isParamNeedJson(params)){

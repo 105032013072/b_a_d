@@ -1,5 +1,6 @@
 package com.bosssoft.platform.apidocs.parser.controller;
 
+import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.LogUtils;
 import com.bosssoft.platform.apidocs.ParseUtils;
 import com.bosssoft.platform.apidocs.Utils;
@@ -89,6 +90,7 @@ public abstract class AbsControllerParser {
 				Explain explain=new Explain();
 				ServiceNode serviceNode=serviceNodeMap.get(fieldType);
 				explain.setKey(fieldType);
+				//String htmlPath=serviceNode.getHtmlPath().replace(DocContext.getDocPath(), "");
 				explain.setType(serviceNode.getHtmlPath());
 				explain.setDescription(serviceNode.getDescription());
 				controllerNode.addAutowiredService(explain);
@@ -145,9 +147,7 @@ public abstract class AbsControllerParser {
     	//jdk1.7
     	List<MethodDeclaration> MethodDeclarationList=getMethodDeclaration(c);
     	for (MethodDeclaration m : MethodDeclarationList) {
-			if("getAfaApplication".equals(m.getNameAsString())){
-				System.out.println(">>");
-			}
+			
     		
     		if(m.getAnnotationByName("RequestMapping")!=null||m.getAnnotationByName("GetMapping")!=null||m.getAnnotationByName("PostMapping")!=null){
 				RequestNode requestNode = new RequestNode();

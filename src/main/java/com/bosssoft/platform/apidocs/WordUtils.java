@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Spliterators;
 
 import org.apache.commons.collections.map.HashedMap;
 
@@ -438,11 +439,11 @@ public class WordUtils {
 		ListItem item=null;
 		if(requestNode.getResponseNode()!=null){
 			
-			item=new ListItem("返回结果：");
+			item=new ListItem("返回结果："+requestNode.getReturnString());
 			item.setSpacingBefore(6);
 			
-			Anchor androidlink = new Anchor("Android Code",linkFont);
-	    	androidlink.setReference("#3.1."+WordDocBuilder.javaCodeOrderMap.get(requestNode.getResponseNode().getClassName()));
+			/*Anchor androidlink = new Anchor("Android Code",linkFont);
+	    	androidlink.setReference("#3.1."+WordDocBuilder.javaCodeOrderMap.get(requestNode.getResponseNode().getClassName())+requestNode.getResponseNode().getClassName());
 	    	item.add(androidlink);
 			
 	    	
@@ -450,7 +451,7 @@ public class WordUtils {
 	    	
 	    	Anchor IOSlink = new Anchor("IOS Code",linkFont);
 	    	IOSlink.setReference("#3.2."+WordDocBuilder.javaCodeOrderMap.get(requestNode.getResponseNode().getClassName()));
-	    	item.add(IOSlink);
+	    	item.add(IOSlink);*/
 	    	
 			
 		}else{

@@ -6,5 +6,6 @@ public enum HtmlType {
   CLASSMAPPER,
   CLASSENTITY,
   CLASSINDEX,
+  MODELINDEX,
   WELCOM
 }

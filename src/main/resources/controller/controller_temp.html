@@ -25,7 +25,7 @@
 <h2 id="调用service">调用service</h2>
 
 	<#list autowiredServiceList as autowiredService>
- <p">	<a href="${autowiredService.type}">» ${autowiredService.description}&nbsp(${autowiredService.key})</a></p>
+ <p">	<a href="../../${autowiredService.type}">» ${autowiredService.description}&nbsp(${autowiredService.key})</a></p>
 	</#list>
 
 <hr>
@@ -74,7 +74,7 @@
   
   
   <#if requestNode.responseJson??>
-    <p><strong>返回结果:</strong> ${requestNode.returnString?default("")?html} <a href="${requestNode.androidCodeUrl}">Android Code</a> | <a href="${requestNode.iOSCodeUrl}">IOS Code</a></p>
+    <p><strong>返回结果:</strong> ${requestNode.returnString?default("")?html} <a href="../../${requestNode.androidCodeUrl}">Android Code</a> | <a href="../../${requestNode.iOSCodeUrl}">IOS Code</a></p>
     <pre class="prettyprint lang-json">
       ${requestNode.responseJson}
     </pre>

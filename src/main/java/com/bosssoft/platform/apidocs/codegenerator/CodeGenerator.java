@@ -45,11 +45,17 @@ public abstract class CodeGenerator {
 		
 		String mapkey=responseNode.getClassName();
 	   if(codeRelativePath.contains(JavaCodeGenerator.JAVA_CODE_DIR)){
-		   WordDocBuilder.addJavaCode(mapkey, codeBodyBuilder.toString());
-		   WordDocBuilder.addJavaCodeOrder(mapkey, (WordDocBuilder.javaCodeOrder++));
+		   if(WordDocBuilder.getJavaCodeMap().get(mapkey)==null){
+			   WordDocBuilder.addJavaCode(mapkey, codeBodyBuilder.toString());
+			   WordDocBuilder.addJavaCodeOrder(mapkey, (WordDocBuilder.javaCodeOrder++));
+		   }
+		  
 	   }else if(codeRelativePath.contains(ModelCodeGenerator.IOS_CODE_DIR)){
-		   WordDocBuilder.addIOSCode(mapkey, codeBodyBuilder.toString());
-		   WordDocBuilder.addIOSCodeOrder(mapkey, (WordDocBuilder.iosCodeOrder++));
+		   if(WordDocBuilder.getIosCodeMap().get(mapkey)==null){
+			   WordDocBuilder.addIOSCode(mapkey, codeBodyBuilder.toString());
+			   WordDocBuilder.addIOSCodeOrder(mapkey, (WordDocBuilder.iosCodeOrder++));
+		   }
+		   
 	   }
 	   
 		return relateUrl;
