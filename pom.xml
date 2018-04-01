@@ -17,7 +17,7 @@
 	<dependency>
 		<groupId>com.github.javaparser</groupId>
 		<artifactId>javaparser-core</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</dependency>
 
 	<dependency>
@@ -82,7 +82,7 @@
 						</descriptorRefs>
 						<archive>
 							<manifest>
-								此处指定main方法入口的class
+								<!-- 此处指定main方法入口的class -->
 								<mainClass>com.bosssoft.platform.apidocs.Docs</mainClass>
 							</manifest>
 						</archive>
@@ -104,8 +104,8 @@
 					<version>3.2</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
-						<source>1.8</source>
-						<target>1.8</target>
+						<source>1.7</source>
+						<target>1.7</target>
 					</configuration>
 				</plugin>
 				<plugin>

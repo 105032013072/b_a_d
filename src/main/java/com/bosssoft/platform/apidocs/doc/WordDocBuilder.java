@@ -140,7 +140,10 @@ public class WordDocBuilder {
 			wordUtils.renderClassName(mapperNode.getClassName());
 			//对应实体
 			/*wordUtils.renderListTitle("对应实体",WordListType.DIAMOND);*/
-			wordUtils.renderCorrespondingEntity(mapperNode.getRelationEntity());
+			if(mapperNode.getRelationEntity()!=null){
+				wordUtils.renderCorrespondingEntity(mapperNode.getRelationEntity());
+			}
+			
 			/*List list=new ArrayList<>();
 			Explain explain=mapperNode.getRelationEntity();
 			list.add(explain);
@@ -220,7 +223,8 @@ public class WordDocBuilder {
 			int requestnum=1;
 			for (RequestNode requestNode : controllerNode.getRequestNodes()) {
 				wordUtils.renderContent((requestnum++)+"."+requestNode.getDescription());
-				wordUtils.renderListTitle("method: "+String.join(",", requestNode.getMethod()), WordListType.SPOTS);
+				//wordUtils.renderListTitle("method: "+String.join(",", requestNode.getMethod()), WordListType.SPOTS);
+				wordUtils.renderListTitle("method: "+org.apache.commons.lang3.StringUtils.join(requestNode.getMethod(),","), WordListType.SPOTS);
 				wordUtils.renderListTitle("url: "+requestNode.getUrl(), WordListType.SPOTS);
 				if(requestNode.getParamNodes().size()>0){
 					wordUtils.renderListTitle("参数列表: ", WordListType.SPOTS);

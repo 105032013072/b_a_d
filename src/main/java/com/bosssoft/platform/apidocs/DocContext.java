@@ -157,7 +157,7 @@ public class DocContext {
 	//根据项目路径解析src路径
 	private static String parse(String path) {
 		String projectSrc="";
-		 File projectDir = new File(path);
+		 final File projectDir = new File(path);
 		List<File> result = new ArrayList<>();
 		Utils.wideSearchFile(projectDir, new FilenameFilter() {
 			@Override
