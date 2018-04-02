@@ -25,6 +25,7 @@ public class Resources {
             return new FileInputStream(new File(sResourcePath,fileName));
         }else{
             return Resources.class.getClass().getResourceAsStream("/" + fileName);
+            
         }
     }
 

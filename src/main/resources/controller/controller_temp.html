@@ -38,7 +38,7 @@
 	
   <pre class="prettyprint lang-json">
    method：<#list requestNode.method as mthod>${mthod},</#list>
-   url: ${requestNode.url}
+   url: ${baseUrl?default("")}${requestNode.url}
   </pre>
   
   <#if ((requestNode.paramNodes)?size>0)>

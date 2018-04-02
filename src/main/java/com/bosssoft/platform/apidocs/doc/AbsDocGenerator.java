@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import com.bosssoft.platform.apidocs.DocContext;
 import com.bosssoft.platform.apidocs.Docs.DocsConfig;
 import com.bosssoft.platform.apidocs.LogUtils;
+import com.bosssoft.platform.apidocs.Resources;
 import com.bosssoft.platform.apidocs.Utils;
 import com.bosssoft.platform.apidocs.codegenerator.ios.ModelCodeGenerator;
 import com.bosssoft.platform.apidocs.codegenerator.java.JavaCodeGenerator;
@@ -103,13 +104,13 @@ public abstract class AbsDocGenerator{
 	private void createhtmlResource() {
 		//复制资源到目标目录
 		try{
-			String orign = Thread.currentThread().getContextClassLoader().getResource("").toURI().getPath()+ File.separator + "style.css";
-			FileUtils.copy(new File(orign), new File(DocContext.getDocPath()), true);
+			String cssFileName = "style.css";
+            File cssFile = new File(DocContext.getDocPath(), cssFileName);
+            Utils.writeToDisk(cssFile, Utils.streamToString(Resources.getTemplateFile(cssFileName)));
 		    cssPath=DocContext.getDocPath()+File.separator + "style.css";
 		}catch(Exception e){
 			LogUtils.error(" faild to  create html resource",e);
 		}
-		
 		
 	}
 
